@@ -125,7 +125,7 @@
 
   .container{
     display: flex;
-    flex-direction: row;
+    flex-wrap: nowrap;
     align-items: center;
     padding: 20px;
     
@@ -155,15 +155,4 @@
   .con_img{
     width: 100px;
     margin: 0 70px 0 70px;
-  }
-
-  .left{
-    text-align: left;
-  }
-  .right{
-    text-align: right;
-  }
-
-  .bacco{
-    background-color: beige;
   }
