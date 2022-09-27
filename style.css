@@ -21,6 +21,22 @@
     /* margin-bottom: 1rem; */
     font-size:large;
   }
+  table,th,td,tr{
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: 1px solid black;
+    text-align: center;
+    padding: 0 10px 0 10px;
+  }
+  th{
+    padding: 15px 5px 15px 5px;
+  }
+  ul{
+    padding: 0 15px 0 15px;
+  }
+  dl{
+    text-align: justify;
+  }
 
   .flex-container {
     display: flex;
@@ -59,7 +75,10 @@
     margin-right: 200px;
     justify-content: center;
   }
-
+img{
+  width: 100px;
+    height: auto;
+}
   .a_tag{
     text-decoration: none;
     border: 1px solid turquoise;
