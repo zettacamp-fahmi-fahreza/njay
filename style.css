@@ -41,6 +41,7 @@
   input{
     margin: 3px 0 5px 0;
     width: auto;;
+    width: 100%;
   }
   .button{
     align-items: center;
