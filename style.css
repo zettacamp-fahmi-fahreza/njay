@@ -38,6 +38,18 @@
     text-align: justify;
   }
 
+  input{
+    margin: 3px 0 5px 0;
+    width: auto;;
+  }
+  .button{
+    align-items: center;
+    background-color: green;
+    padding: 5px 20px 5px 20px;
+    color: white;
+    font-weight: 900;
+  }
+
   .flex-container {
     display: flex;
     flex-direction: column;
