@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Form</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="flex-container">
+      <h1>Forms</h1>
+      <form>
+        <label for="fname">First name:</label><br />
+        <input
+          placeholder="Your first name"
+          type="text"
+          id="fname"
+          name="fname"
+          required
+        /><br />
+        <label for="lname">Last name:</label><br />
+        <input
+          placeholder="Your last name"
+          type="text"
+          id="lname"
+          name="lname"
+          required
+        /><br />
+
+        <label for="biography">Biography:</label><br />
+        <textarea id="biography" name="biography" rows="10" cols="30">
+        </textarea
+        ><br />
+        <label for="gender">Gender:</label><br />
+        <input type="radio" id="gender" name="gender" value="male" />
+        Male
+        <input type="radio" id="gender" name="gender" value="female" />
+        Female<br />
+        <label for="email">Email:</label><br />
+        <input
+          required
+          placeholder="user@gmail.com"
+          type="email"
+          name="email"
+          id="email"
+        /><br />
+        <label for="password">Password</label><br />
+        <input
+          required
+          placeholder="Password"
+          type="password"
+          name="password"
+        /><br />
+        <label for="telephone">Telephone Number:</label><br />
+        <input
+          required
+          placeholder="+62"
+          type="number"
+          name="telephone"
+          id="telephone"
+        /><br />
+
+        <label for="age">Age:</label><br />
+        <input
+          required
+          placeholder="Your age"
+          type="number"
+          name="age"
+          id="age"
+        /><br />
+        <label for="website">Website:</label><br />
+        <input
+          placeholder="Your website"
+          type="url"
+          name="website"
+          id="website"
+        /><br />
+        <label for="borndate">Born Date</label><br />
+        <input required type="date" name="borndate" id="borndate" />
+        <br />
+        <label for="file">ID Card</label><br />
+        <input type="file" name="file" id="file" /><br />
+
+        <input class="button" type="submit" value="Submit" />
+      </form>
+    </div>
+  </body>
+</html>
