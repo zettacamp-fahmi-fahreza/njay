@@ -29,18 +29,10 @@ function getVal(){
     
     document.getElementById("showImg").innerHTML = file;
 };
-// const biography = document.querySelector("#sbiography");
-// const fname = document.getElementById("fname");
-// const lname = document.getElementById("lname");
-// const male = document.getElementById("male");
-
-// console.log("Hello");
-// console.dir(fn);
 
 function getVal2(){
 
     const biography = document.getElementById("biography").value;
-    // console.log(document.getElementById("showBiogpraphy").innerHTML= biography);
     document.getElementById("showBiogpraphy").innerHTML = biography;
 
 
