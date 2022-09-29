@@ -24,103 +24,108 @@
         </div>
 
         <div class="nav-links">
-          <a href="page1.html" target="_blank">Item</a>
-          <a href="page2.html" target="_blank">Table</a>
+          <nav>
+            <a href="page1.html" target="_blank">Item</a>
+            <a href="page2.html" target="_blank">Table</a>
+          </nav>
         </div>
       </div>
     </header>
-    <div class="flex-container">
-      <section id="section1">
-        <h1>Section 1</h1>
-        <form action="/page1.html">
-          <label for="fname">First name:</label><br />
-          <input
-            placeholder="Your first name"
-            type="text"
-            id="fname"
-            name="fname"
-          /><br />
-          <label for="lname">Last name:</label><br />
-          <input
-            placeholder="Your last name"
-            type="text"
-            id="lname"
-            name="lname"
-          /><br />
+    <main>
+      <div class="flex-container">
+        <section id="section1">
+          <h1>Section 1</h1>
+          <form action="/page1.html">
+            <label for="fname">First name:</label><br />
+            <input
+              placeholder="Your first name"
+              type="text"
+              id="fname"
+              name="fname"
+            /><br />
+            <label for="lname">Last name:</label><br />
+            <input
+              placeholder="Your last name"
+              type="text"
+              id="lname"
+              name="lname"
+            /><br />
 
-          <label for="biography">Biography:</label><br />
-          <textarea id="biography" name="biography" rows="7" cols="30">
-          </textarea
-          ><br />
-          <label for="gender">Gender:</label><br />
-          <input
-            style="width: 10%"
-            type="radio"
-            id="male"
-            name="gender"
-            value="male"
-          />
-          Male
-          <input
-            style="width: 10%"
-            type="radio"
-            id="female"
-            name="gender"
-            value="female"
-          />
-          Female<br />
-          <label for="email">Email:</label><br />
-          <input
-            placeholder="user@gmail.com"
-            type="email"
-            name="email"
-            id="email"
-          /><br />
-          <label for="telephone">Telephone Number:</label><br />
-          <input placeholder="+62" type="number"" name="telephone"
-          id="telephone" /><br />
+            <label for="biography">Biography:</label><br />
+            <textarea id="biography" name="biography" rows="7" cols="30">
+            </textarea
+            ><br />
+            <label for="gender">Gender:</label><br />
+            <input
+              style="width: 10%"
+              type="radio"
+              id="male"
+              name="gender"
+              value="male"
+            />
+            Male
+            <input
+              style="width: 10%"
+              type="radio"
+              id="female"
+              name="gender"
+              value="female"
+            />
+            Female<br />
+            <label for="email">Email:</label><br />
+            <input
+              placeholder="user@gmail.com"
+              type="email"
+              name="email"
+              id="email"
+            /><br />
+            <label for="telephone">Telephone Number:</label><br />
+            <input placeholder="+62" type="number"" name="telephone"
+            id="telephone" /><br />
 
-          <label for="age">Age:</label><br />
-          <input
-            placeholder="Your age"
-            type="number"
-            name="age"
-            id="age"
-          /><br />
-          <label for="website">Website:</label><br />
-          <input
-            placeholder="Your website"
-            type="url"
-            name="website"
-            id="website"
-          /><br />
-          <label for="borndate">Born Date</label><br />
-          <input type="date" name="borndate" id="borndate" />
-          <br />
-          <label for="file">ID Card</label><br />
-          <input type="file" name="file" id="file" /><br />
+            <label for="age">Age:</label><br />
+            <input
+              placeholder="Your age"
+              type="number"
+              name="age"
+              id="age"
+            /><br />
+            <label for="website">Website:</label><br />
+            <input
+              placeholder="Your website"
+              type="url"
+              name="website"
+              id="website"
+            /><br />
+            <label for="borndate">Born Date</label><br />
+            <input type="date" name="borndate" id="borndate" />
+            <br />
+            <label for="file">ID Card</label><br />
+            <input type="file" name="file" id="file" /><br />
 
-          <input
-            class="button"
-            type="button"
-            value="Submit"
-            onclick="getVal(),getVal2()"
-          />
-        </form>
-      </section>
-      <div id="result"></div>
-      <section>
-        <p id="first">First name</p>
-        <p id="last">Last name</p>
-        <p id="showBiogpraphy">Biography</p>
-        <p id="showGender">Gender</p>
-        <p id="showEmail">Email</p>
-        <p id="showTelephone">Telephone</p>
-        <p id="showAge">Age</p>
-        <p id="showWebsite">website</p>
-        <p id="showBorndate">Borndate</p>
-        <p id="showImg">Image</p>
-      </section>
-    </div>
+            <input
+              class="button"
+              type="button"
+              value="Submit"
+              onclick="getVal(),getVal2()"
+            />
+          </form>
+        </section>
+        <div id="result"></div>
+        <section>
+          <p id="first">First name</p>
+          <p id="last">Last name</p>
+          <p id="showBiogpraphy">Biography</p>
+          <p id="showGender">Gender</p>
+          <p id="showEmail">Email</p>
+          <p id="showTelephone">Telephone</p>
+          <p id="showAge">Age</p>
+          <p id="showWebsite">website</p>
+          <p id="showBorndate">Borndate</p>
+          <p id="showImg">Image <img src="img/hoodie.png" alt="" /></p>
+        </section>
+      </div>
+    </main>
+    <footer style="text-align: center">fahmi fahreza footer</footer>
   </body>
 </html>
