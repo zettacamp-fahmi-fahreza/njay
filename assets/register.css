@@ -1,0 +1,166 @@
+* {
+    box-sizing: border-box;
+  }
+  
+  body {
+    margin: 0px;
+    font-family: 'segoe ui';
+  }
+  h1,h6 {
+    margin-bottom: 30px;
+    font-family: "Saira Extra Condensed", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+    font-weight: 700;
+    line-height: 1.2;
+    color: #343a40;
+  }
+form,table,tr,td{
+    display:flex;
+    margin-bottom: 5px;
+
+}
+  p {
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    font-size:large;
+  }
+  button,a{
+    text-decoration: none;
+    background-color: green;
+    color: white;
+        border: 1px solid black;
+  }
+  .subscription,.service > h3{
+    text-align: center;
+    font-size: 25px;
+    
+  }
+
+  .flex-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    margin-top: 80px;
+  }
+  
+  .flex-container > div {
+    margin: 10px;
+    padding: 20px;
+    font-size: 10px;
+  }
+
+  .container{
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    padding: 20px;
+    
+  }
+  .containers{
+    display: flex;
+    align-items:center;
+    justify-content: space-between;
+    padding: 20px;
+    
+    
+  }
+
+  .containers> div {
+    margin: 10px;
+    padding: 20px;
+  }
+  .container> div {
+    margin: 10px;
+    padding: 20px;
+    font-size: 30px;
+    text-align: center;
+  }
+
+  .con_img{
+    width: 100px;
+    margin: 0 70px 0 70px;
+  }
+  .adele{
+    border: 2px solid black;;
+  }
+  .adele > h2{
+    font-size: 25px;
+    margin-bottom: 10px;
+  }
+.album_img{
+    width: 150px;
+    align-items: center;;
+}
+  .my_img{
+    width: 250px;
+    height: auto;
+    align-items: center;
+    margin-left: 200px;
+    margin-right: 200px;
+    justify-content: center;
+  }
+
+  .a_tag{
+    text-decoration: none;
+    border: 1px solid turquoise;
+  }
+
+  .con_img{
+    width: 100px;
+    margin: 0 70px 0 70px;
+  }
+  .about,.about2{
+    font-size: 20px;
+    margin: 5px;
+    background-color: rgb(194, 237, 251);
+    align-items: left   ;
+    position: relative;
+    right: 250px;
+    border-radius: 3%;
+  }
+  .about1,.about3{
+    position: relative;
+    font-size: 20px;
+    margin: 5px;
+    background-color: lightcyan;
+    left: 250px;
+    border-radius: 3%;
+  }
+  .card{
+    border: 3px solid lightgray;
+    padding: 5px 2px 5px 2px;
+    box-shadow: 3px 3px 3px 3px gray;
+  }
+  .myname{
+    text-align: center   ;
+    color: white;
+    background-color: lightskyblue;
+    font-weight: 900;
+    position: relative;
+    bottom: 22px;
+  }
+  .mypremium{
+    text-align: center   ;
+  }
+  .myemail{
+    text-align:left;
+font-weight: 700;
+    color: white;
+    background-color: lightcoral;
+  }
+  .mytelephone{
+    text-align:right;
+font-weight: 700;
+    color: white;
+    background-color: lightsalmon;
+  }
+
+
+  table,th,td,tr{
+    border-collapse: collapse;
+    border-spacing: 0;
+    border: none;
+    text-align: center;
+    padding: 0 10px 0 10px;
+    font-weight: 600;
+  }

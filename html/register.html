@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register</title>
+    <link rel="stylesheet" href="../assets/register.css" />
+  </head>
+  <body>
+    <div class="flex-container">
+      <h1>Register</h1>
+      <form>
+        <table>
+          <tr>
+            <td><label for="name">Name:</label></td>
+            <td><input type="text" id="name" name="name" /></td>
+          </tr>
+          <tr>
+            <td><label for="email">Email:</label></td>
+            <td><input type="email" id="email" name="email" /></td>
+          </tr>
+          <tr>
+            <td><label for="phone">Phone Number:</label></td>
+            <td><input type="number" id="phone" name="phone" /></td>
+          </tr>
+          <tr>
+            <td><label for="type">Type:</label></td>
+            <td>
+              <input type="radio" name="type" id="free" value="free" />Free
+            </td>
+            <td>
+              <input
+                type="radio"
+                name="type"
+                id="personal"
+                value="personal"
+              />Personal
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <button type="submit">
+                <a href="profile.html">Register</a>
+              </button>
+            </td>
+          </tr>
+        </table>
+      </form>
+    </div>
+  </body>
+</html>
