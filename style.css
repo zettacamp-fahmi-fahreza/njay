@@ -1,0 +1,19 @@
+body{
+    position: flex;
+    text-align: center;;
+    justify-content: center;
+    
+}
+img{
+    border-radius: 50%;
+}
+.span1{
+    font-size: 25px;
+    color: darkgoldenrod;
+    font-weight: 800;
+}
+.span2{
+    font-size: 19px;
+    color: darkkhaki;
+    font-weight: 650;
+}
