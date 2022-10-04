@@ -1,0 +1,28 @@
+*{
+    color: darkblue;;
+    font-family: Arial, Helvetica, sans-serif;
+    align-items: center;
+    text-align: center;;
+}
+.card{
+    width: 25%;
+    margin: 0px 10px;
+    padding: 0px 5px;
+    border: 1px dashed darkgoldenrod;
+    position: relative;
+    
+    background-color: lightgray;
+}
+.flex-container{
+    display: flex;
+    justify-content: center;
+}
+.card > h2{
+    font-size: 35px;
+    font-weight: 850;
+    background-color: lightgoldenrodyellow;
+}
+.card > img{
+    width: 100px;
+    margin: 10px 0;
+}
