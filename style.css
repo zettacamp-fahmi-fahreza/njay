@@ -20,6 +20,58 @@ body{
     justify-content: center;
     margin-top: 0;
 }
+
+.card{
+    width: 33%;
+    height: 450px;
+    border: 1px solid black;;
+    position: relative;
+    background-color: white;
+    margin: 0 10px;
+    transition: 0.8s;
+}
+.card:hover{
+    background-color: wheat;
+    border-radius: 11%;
+
+}
+.card h1::first-letter{
+    background-color: black;;
+    color: white;
+    font-size: 35px;
+    border-radius: 20%;
+}
+.card img{
+    width: 260px;
+    margin: 0;
+    padding: 0;
+}
+.card p::first-letter{
+    color: rgba(0, 0, 0, 0.754);
+    font-size: 19px;
+}
+.card a{
+    color: white;
+    text-decoration: none;
+    padding: 5px 10px;
+    background-color: rgb(0, 166, 255);
+    position: relative;
+    bottom :13px;
+    transition: 0.7s;
+}
+.card a:hover{
+    background-color: rgb(255, 0, 128);
+    border-radius: 1%;
+    font-size: 20px;
+    padding: 8px 13px;
+}
+.card p{
+    padding: 0;
+    margin: 0 10px 25px 10px;
+}
+.container > h1{
+    margin-bottom: 0;
+}
 footer{
     display: flex;;
     justify-content: space-evenly;
@@ -44,31 +96,3 @@ footer nav a:hover{
 }
 footer p{vertical-align: middle;
 margin: 10px 25px;}
-.card{
-    width: 33%;
-    border: 1px solid black;;
-    position: relative;
-    background-color: white;
-    margin: 0 10px;
-}
-.card img{
-    width: 260px;
-    margin: 0;
-    padding: 0;
-}
-.card a{
-    color: white;
-    text-decoration: none;
-    padding: 5px 10px;
-    background-color: rgb(0, 166, 255);
-    position: relative;
-    bottom :13px;
-
-}
-.card p{
-    padding: 0;
-    margin: 0 10px 25px 10px;
-}
-.container > h1{
-    margin-bottom: 0;
-}
