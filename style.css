@@ -3,7 +3,6 @@
     font-family: Arial, Helvetica, sans-serif;
     align-items: center;
     text-align: center;
-    
 }
 ul{
     list-style-type: none; 
@@ -11,7 +10,6 @@ ul{
 }
 body{
     min-height: 100vh;
-    display: flex;
     flex-direction: column;;
     margin: 0;
     background-color: rgb(255, 0, 128);
@@ -19,7 +17,6 @@ body{
 .card:hover{
     background-color: wheat;
     border-radius: 11%;
-
 }
 .card h1::first-letter{
     background-color: black;;
@@ -47,38 +44,23 @@ body{
     margin: 70px 20px;
     width: 40%;
     position: relative;
-    vertical-align: middle;;
 }
 .product img{
     width: 50%;
     height: auto;
 }
-section{
-    background-color: white;
-    margin-top: 100px;
-}
 .detail{
-    vertical-align: middle;;
     width: 60%;
     position: relative;
     background-color: rgba(107, 200, 14,0.8);
-    color: white;
     padding: 20px 30px;
     margin-right: 100px;
     
 }
 footer{
-    display: flex;;
     justify-content: space-evenly;
     background-color: rgb(107, 200, 14);;
-    color: white;
     width: 100%;
     font-size: 25px;
     margin-top: auto;
 }
-footer nav{
-    vertical-align: middle;
-    margin: 0 25px;
-}
-footer p{vertical-align: middle;
-margin: 10px 25px;}

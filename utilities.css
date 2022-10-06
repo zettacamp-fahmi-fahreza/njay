@@ -16,6 +16,13 @@
     bottom :13px;
     transition: 0.7s;
 }
+.vertical-middle{
+    vertical-align: middle;
+}
+
+.flex{
+    display: flex;
+}
 .btn-primary:hover{
     background-color: rgb(255, 0, 128);
     border-radius: 1%;
@@ -39,7 +46,16 @@
     margin:40px 0;
 }
 
-.main-color{background-color:white ;}
+.mt-xl{
+    margin-top: 100px;
+}
+
+.white{
+    color: white;
+}
+.main-color{
+    background-color:white ;
+}
 .border-sm{
     border: 1px solid black;;
 }
