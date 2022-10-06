@@ -49,6 +49,7 @@ body{
     width: 50%;
     height: auto;
 }
+
 .detail{
     width: 60%;
     position: relative;
@@ -56,6 +57,13 @@ body{
     padding: 20px 30px;
     margin-right: 100px;
     
+}
+li img{
+    position:absolute;
+    left: 10%;width: 70px;
+}
+li p{
+    padding: 15px 0;
 }
 footer{
     justify-content: space-evenly;
