@@ -15,62 +15,6 @@ border: 1px solid rgb(31, 35, 40);;
     width: 100%;
 }
 
-@media screen and (max-width:600px) {
-section{
-    margin-top: 200px !important;
-}
-    body{
-        margin: 0 !important;
-        display: block;
-    }
-    h1{
-        font-size: 20px !important;
-    }
-    p{
-        font-size: 10px !important
-    };
-/* .container img{
-    margin: 0 !important;
-    position: relative !important;
-    right: 50px !important;
-} */
-
-.description{
-    vertical-align:middle;
-        position:absolute !important; 
-        left: 0;
-        top: 0;
-        right: 0;
-        margin: 200px !important;
-    }
-    
-
-    video{
-        width: 280px !important;
-        height: 157px !important;
-        justify-content: center;
-        align-items: center;
-        left: 50px;
-    }
-    .header h1{
-        font-size: 20px !important;
-    }
-    .flex-container{
-        display: block !important;
-
-    justify-content: center;
-    margin-top: 0;
-    }
-
-.card{
-    width: 100% !important;
-    height: 300px !important;
-    position: relative;
-}
-    .card img{
-        width: 150px !important;
-    }
-}
 section{
     margin: 100px 0;
     align-items: center;
@@ -255,3 +199,60 @@ footer p{vertical-align: middle;
 margin: 10px 25px;}
 
 
+
+@media screen and (max-width:600px) {
+    section{
+        margin-top: 200px !important;
+    }
+        body{
+            margin: 0 !important;
+            display: block;
+        }
+        h1{
+            font-size: 20px !important;
+        }
+        p{
+            font-size: 10px !important
+        };
+    /* .container img{
+        margin: 0 !important;
+        position: relative !important;
+        right: 50px !important;
+    } */
+    
+    .description{
+        vertical-align:middle;
+            position:absolute !important; 
+            left: 0;
+            top: 0;
+            right: 0;
+            margin: 200px !important;
+        }
+        
+    
+        video{
+            width: 280px !important;
+            height: 157px !important;
+            justify-content: center;
+            align-items: center;
+            left: 50px;
+        }
+        .header h1{
+            font-size: 20px !important;
+        }
+        .flex-container{
+            display: block !important;
+    
+        justify-content: center;
+        margin-top: 0;
+        }
+    
+    .card{
+        width: 100% !important;
+        height: 300px !important;
+        position: relative;
+    }
+        .card img{
+            width: 150px !important;
+        }
+    }
