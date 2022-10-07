@@ -30,7 +30,7 @@
 .btn-primary:hover{
     background-color: rgb(255, 0, 128);
     border-radius: 1%;
-    font-size: 20px;
+    font-size: 5vh;
     padding: 8px 13px;
 }
 
@@ -70,8 +70,8 @@
     margin:20px 15px;
 }
 .card-md{
-    width: 400px;
-    height:600px;
+    width: 23em;
+    height:45rem;
     position: relative;
 }
 .border-btm{
@@ -85,13 +85,18 @@
 }
 .flex-container{
     display: flex;
-    justify-content: center;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
     margin-top: 0;
+
 }
 
 .card{
-    width: 33%;
-    height: 450px;
+    width: 25vmax;;
+    height: 38vmax;
+    
+    font-size:1rem;
     position: relative;
     transition: 0.8s;
 }

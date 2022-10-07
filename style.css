@@ -15,10 +15,9 @@ body{
     background-color: rgb(255, 0, 128);
 }
 #popularProd{
-    font-size: 45px;
+    font-size: 1cm;
     background-color: rgba(255, 255, 255,0.7);
 }
-
 #itemList{
     color: rgb(152, 0, 0);
 }
@@ -29,7 +28,7 @@ body{
 .card h1::first-letter{
     background-color: black;;
     color: white;
-    font-size: 35px;
+    font-size: 0.5in;
     border-radius: 20%;
 }
 .card img{
@@ -39,7 +38,7 @@ body{
 }
 .card p::first-letter{
     color: rgba(0, 0, 0, 0.754);
-    font-size: 19px;
+    font-size: 8mm;
 }
 .card p{
     padding: 0;
