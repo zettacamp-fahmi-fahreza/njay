@@ -34,8 +34,8 @@ let bookDetails = {
 }
 
 let amountPrice = 0;
-let totalPrice = function(){
-    for(let i= 1; i <= book.wantToBuy; i++){
+let totalPrice = function(wantToBuy) {
+    for(let i= 1; i <= wantToBuy; i++){
         if(book.stock > 0){
             amountPrice += book.finalPrice();
             book.stock -= 1;
@@ -63,7 +63,7 @@ The amount of tax is ${book.tax}%,
 price after tax (without discount) is RP ${book.priceAfterTax()},
 And the final price including discount and tax is RP ${book.finalPrice()}
 `);
-totalPrice()
+totalPrice(5)
 
 
 
