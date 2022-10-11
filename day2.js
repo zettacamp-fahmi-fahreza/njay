@@ -6,7 +6,7 @@ const book = {
     onSale : true,
     discount : 10,
     stock : 10,
-    purchasedBook : 9,
+    wantToBuy : 13,
     tax :10,
     priceAfterDiscount : function(){
         if (this.onSale){
@@ -24,6 +24,7 @@ const book = {
         }
     }
 }
+let purchasedBook = 0
 let bookDetails = {
     title : book.title,
     category : book.category,
@@ -31,18 +32,21 @@ let bookDetails = {
     discount : `${book.discount}%`,
     finalPrice : book.finalPrice()
 }
+
 let amountPrice = 0;
 let totalPrice = function(){
-    for(let i= 0; i < book.purchasedBook; i++){
+    for(let i= 1; i <= book.wantToBuy; i++){
         if(book.stock > 0){
             amountPrice += book.finalPrice();
             book.stock -= 1;
+            purchasedBook = i
+
         }else{
             break;
         }
     }
     console.log(`The total price is:
-    ${book.purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
+    ${purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
     console.log(`Our available stock: ${book.stock}`)
     if(book.stock > 0){
         console.log(`You can still buy ${book.stock} of our book`)
@@ -50,13 +54,6 @@ let totalPrice = function(){
         console.log(`Im Sorry, but our book is out of stock`)
     }
 }
-
-// let totalPrice = function(){
-//     for(let i= 0; i < book.purchasedBook; i++){
-//         amountPrice += book.finalPrice();
-//     }
-//     book.stock -= book.purchasedBook;
-// }
 
 
 console.log(bookDetails)
