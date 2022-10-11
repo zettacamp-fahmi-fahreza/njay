@@ -30,7 +30,7 @@ let bookDetails = {
     category : book.category,
     author : book.author,
     discount : `${book.discount}%`,
-    finalPrice : book.finalPrice()
+    finalPrice : book.finalPrice().toLocaleString("id")
 }
 
 let amountPrice = 0;
@@ -46,7 +46,7 @@ let totalPrice = function(wantToBuy) {
         }
     }
     console.log(`The total price is:
-    ${purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
+    ${purchasedBook} x RP ${book.finalPrice().toLocaleString("id")} = RP ${amountPrice.toLocaleString('id')}`)
     console.log(`Our available stock: ${book.stock}`)
     if(book.stock > 0){
         console.log(`You can still buy ${book.stock} of our book`)
@@ -58,10 +58,10 @@ let totalPrice = function(wantToBuy) {
 
 console.log(bookDetails)
 console.log(`The amount of discount is ${book.discount}%,
-price after discount is RP ${book.priceAfterDiscount()},
+price after discount is RP ${book.priceAfterDiscount().toLocaleString("id")},
 The amount of tax is ${book.tax}%,
-price after tax (without discount) is RP ${book.priceAfterTax()},
-And the final price including discount and tax is RP ${book.finalPrice()}
+price after tax (without discount) is RP ${book.priceAfterTax().toLocaleString("id")},
+And the final price including discount and tax is RP ${book.finalPrice().toLocaleString("id")}
 `);
 totalPrice(5)
 
