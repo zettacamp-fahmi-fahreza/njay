@@ -24,8 +24,6 @@ const book = {
         }
     }
 }
-
-
 let bookDetails = {
     title : book.title,
     category : book.category,
@@ -33,6 +31,34 @@ let bookDetails = {
     discount : `${book.discount}%`,
     finalPrice : book.finalPrice()
 }
+let amountPrice = 0;
+let totalPrice = function(){
+    for(let i= 0; i < book.purchasedBook; i++){
+        if(book.stock > 0){
+            amountPrice += book.finalPrice();
+            book.stock -= 1;
+        }else{
+            break;
+        }
+    }
+    console.log(`The total price is:
+    ${book.purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
+    console.log(`Our available stock: ${book.stock}`)
+    if(book.stock > 0){
+        console.log(`You can still buy ${book.stock} of our book`)
+    }else{
+        console.log(`Im Sorry, but our book is out of stock`)
+    }
+}
+
+// let totalPrice = function(){
+//     for(let i= 0; i < book.purchasedBook; i++){
+//         amountPrice += book.finalPrice();
+//     }
+//     book.stock -= book.purchasedBook;
+// }
+
+
 console.log(bookDetails)
 console.log(`The amount of discount is ${book.discount}%,
 price after discount is RP ${book.priceAfterDiscount()},
@@ -40,6 +66,7 @@ The amount of tax is ${book.tax}%,
 price after tax (without discount) is RP ${book.priceAfterTax()},
 And the final price including discount and tax is RP ${book.finalPrice()}
 `);
+totalPrice()
 
 
 
