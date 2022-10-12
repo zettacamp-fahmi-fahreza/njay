@@ -6,7 +6,7 @@ const book = {
     onSale : true,
     discount : 10,
     stock : 10,
-    wantToBuy : 13,
+    // wantToBuy : 13,
     tax :10,
     priceAfterDiscount : function(){
         if (this.onSale){
@@ -36,11 +36,10 @@ let bookDetails = {
 let amountPrice = 0;
 let totalPrice = function(wantToBuy) {
     for(let i= 1; i <= wantToBuy; i++){
-        if(book.stock > 0){
+        if(book.stock){
             amountPrice += book.finalPrice();
             book.stock -= 1;
             purchasedBook = i
-
         }else{
             break;
         }
@@ -48,7 +47,7 @@ let totalPrice = function(wantToBuy) {
     console.log(`The total price is:
     ${purchasedBook} x RP ${book.finalPrice().toLocaleString("id")} = RP ${amountPrice.toLocaleString('id')}`)
     console.log(`Our available stock: ${book.stock}`)
-    if(book.stock > 0){
+    if(book.stock){
         console.log(`You can still buy ${book.stock} of our book`)
     }else{
         console.log(`Im Sorry, but our book is out of stock`)
@@ -63,7 +62,9 @@ The amount of tax is ${book.tax}%,
 price after tax (without discount) is RP ${book.priceAfterTax().toLocaleString("id")},
 And the final price including discount and tax is RP ${book.finalPrice().toLocaleString("id")}
 `);
-totalPrice(5)
+// totalPrice(5)
+// totalPrice(10)
+totalPrice(20)
 
 
 
