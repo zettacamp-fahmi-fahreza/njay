@@ -36,11 +36,6 @@ let creditFunction = (book, creditMonth) =>{
     monthlyPay.totalPriceCredit= 0;
     monthlyPay.debt = debt
     let newArr = []
-
-    
-
-
-    
     for(let i = 0; i < creditMonth; i++) {
             monthlyPay.month = i +1;
             monthlyPay.debt -= credit
