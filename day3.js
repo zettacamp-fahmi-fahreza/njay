@@ -26,14 +26,15 @@ const book = {
     }
 }
 let creditFunction = (book, creditMonth) =>{
-    const {price} = book
-    
+    const {price,author,category} = book
+
     let credit = Math.ceil(price /creditMonth)
-    const monthlyPay = {}
+    const monthlyPay = {
+        credit,
+        price,
+        totalPriceCredit: 0
+        }
     debt = credit * creditMonth
-    monthlyPay.credit = credit
-    monthlyPay.price = price
-    monthlyPay.totalPriceCredit= 0;
     monthlyPay.debt = debt
     let newArr = []
     for(let i = 0; i < creditMonth; i++) {
@@ -46,6 +47,8 @@ let creditFunction = (book, creditMonth) =>{
         e.scheme=`Scheme Credit ${ e.month}`;
     })
     console.log(newArr)
+    console.log(author)
+    console.log(category)
     book.monthlyPay = newArr
 }
 
@@ -90,7 +93,7 @@ And the final price including discount and tax is RP ${book.finalPrice()}
 `);
 totalPrice(5)
 console.log("===========================================")
-creditFunction(book, 2);
+creditFunction(book, 5);
 
 
 
@@ -101,15 +104,16 @@ creditFunction(book, 2);
 
 
 // console.log(book);
-// let person = {
-//     name: 'John',
-//     age:29
-// }
-// // let person2 = person
+let person = {
+    name: 'John',
+    age:29
+}
 // let person2 = person
+let person2 = {...person}
 
-// person.age=31
-// console.log(person2);
+person.age=31
+console.log(person2);
+console.log(person)
 
 // testArr = [1,2,3]
 // testArr.push(5)
