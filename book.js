@@ -8,23 +8,25 @@ const book = {
     stock : 10,
     wantToBuy : 13,
     tax :10,
-    priceAfterDiscount : function(){
-        if (this.onSale){
-        return this.price - (this.price * (this.discount/100));
-    }{return `Sorry, The Item is currently not on sale with the normal price after tax = ${this.priceAfterTax()}`;
-}},
-    priceAfterTax : function(){
-        return this.price + (this.price * (this.tax/100));
-    },
-    finalPrice : function(){
-        if (this.onSale){
-            return this.priceAfterDiscount() + (this.priceAfterDiscount() * (this.tax/100));
-            // book.totaltotprice = this.finalPrice();
-        }{
-            return this.priceAfterTax();
-        }
+    
+}
+finalPrice = function(){
+    if (book.onSale){
+        return book.priceAfterDiscount() + (book.priceAfterDiscount() * (book.tax/100));
+        // book.totaltotprice = book.finalPrice();
+    }{
+        return book.priceAfterTax();
     }
 }
+priceAfterTax = function(){
+    return book.price + (book.price * (book.tax/100));
+}
+priceAfterDiscount = function(){
+    if (book.onSale){
+    return book.price - (book.price * (book.discount/100));
+}{return `Sorry, The Item is currently not on sale with the normal price after tax = ${book.priceAfterTax()}`;
+}}
+
 let creditFunction = (book, creditMonth) =>{
     const {price,author,category} = book
 
@@ -86,10 +88,10 @@ let totalPrice = function(wantToBuy) {
 
 console.log(bookDetails)
 console.log(`The amount of discount is ${book.discount}%,
-price after discount is RP ${book.priceAfterDiscount()},
+price after discount is RP ${priceAfterDiscount()},
 The amount of tax is ${book.tax}%,
-price after tax (without discount) is RP ${book.priceAfterTax()},
-And the final price including discount and tax is RP ${book.finalPrice()}
+price after tax (without discount) is RP ${priceAfterTax()},
+And the final price including discount and tax is RP ${finalPrice()}
 `);
 totalPrice(5)
 console.log("===========================================")
