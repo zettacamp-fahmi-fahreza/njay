@@ -12,26 +12,8 @@ const book = {
     tax :10
 }
 
-finalPrice = function(){
-    if (book.onSale){
-        return priceAfterDiscount() + (priceAfterDiscount() * (book.tax/100));
-        // book.totaltotprice = book.finalPrice();
-    }else{
-        return priceAfterTax();
-    }
-}
-
-// const bookDetails = {
-//     title : book.title,
-//     category : book.category,
-//     author : book.author,
-//     discount : `${book.discount}%`,
-//     discountPrice : priceAfterDiscount(),
-//     finalPrice : finalPrice()
-// }
 let creditFunction = (book, creditMonth) =>{
     const {price} = book
-
     let credit = Math.ceil(price /creditMonth)
     const monthlyPay = {
         credit,
@@ -53,7 +35,6 @@ let creditFunction = (book, creditMonth) =>{
     console.log(newArr)
     book.monthlyPay = newArr
 }
-
 bookList= [];
 function addBook(book, amount) {
     for (let i = 0; i < amount; i++) {
