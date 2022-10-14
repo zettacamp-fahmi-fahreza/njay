@@ -45,8 +45,6 @@ function addBook(book, amount) {
 }
 
 const app = express();
-
-
 // TANPILIN BUKU
  app.get('/',authentication, function(req, res, next) {
     res.send(book);
