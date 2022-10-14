@@ -63,31 +63,6 @@ function addBook(book, amount) {
     return bookList;
 }
 
-
-let purchasedBook = 0
-let amountPrice = 0;
-let totalPrice = function(wantToBuy) {
-    for(let i= 1; i <= wantToBuy; i++){
-        if(book.stock){
-            amountPrice += book.finalPrice();
-            book.stock -= 1;
-            purchasedBook = i
-
-        }else{
-            break;
-        }
-    }
-    // console.log(`The total price is:
-    // ${purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
-    // console.log(`Our available stock: ${book.stock}`)
-    // if(book.stock > 0){
-    //     console.log(`You can still buy ${book.stock} of our book`)
-    // }else{
-        console.log(`Im Sorry, but our book is out of stock`)
-    // }
-}
-
-
 const app = express();
 
 
@@ -97,7 +72,8 @@ const app = express();
      })
 // TAMBAHIN BUKU
 app.get('/addBook/:bookAmount',authentication, function(req, res, next) {
-    const bookAmount = req.params.bookAmount
+    let bookAmount = req.params.bookAmount
+    bookAmount = parseInt(bookAmount)
     res.send(addBook(book , bookAmount));
 })
 //HARGA DISKON
@@ -132,9 +108,17 @@ app.get('/finalPrice',authentication, function(req, res) {
 // KREDIT BUKU
 app.get('/credit/:creditAmount', authentication, function(req, res, next) {
     let {creditAmount} = req.params;
+    let err;
     creditAmount = parseInt(creditAmount);
+    if (Number.isNaN(creditAmount)) {
+    err = new Error('Expected value of Integer');
+    res.send({
+        err : err.message
+    })
+    }else{
     creditFunction(book , creditAmount);
     res.send(book);
+    }
 })
 
 // FUNGSI AUTENTIKASI
@@ -149,16 +133,13 @@ function authentication(req, res, next) {
     }else{
         let auth = new Buffer.from(authheader.split(' ')[1],
         'base64').toString().split(':');
-        console.log(new Buffer.from(authheader.split(' ')[1],
-        'base64').toString())
-        let user = auth[0];
+        let user = auth[0]
         let pass = auth[1];
      
         if (user == 'admin' && pass == 'password') {
             next();
         } else {
             err = new Error("Wrong Username or Password!");
-            console.log(err.message)
             res.send({
                 err : err.message
             }
