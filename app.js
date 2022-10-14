@@ -12,6 +12,16 @@ const book = {
     tax :10
 }
 
+    // console.log(`The total price is:
+    // ${purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
+    // console.log(`Our available stock: ${book.stock}`)
+    // if(book.stock > 0){
+    //     console.log(`You can still buy ${book.stock} of our book`)
+    // }else{
+    //     console.log(`Im Sorry, but our book is out of stock`)
+    // }
+
+
 let creditFunction = (book, creditMonth) =>{
     const {price} = book
     let credit = Math.ceil(price /creditMonth)
@@ -78,14 +88,13 @@ app.get('/tax',authentication, function(req, res) {
 app.get('/finalPrice',authentication, function(req, res) {
     let discount = book.price - (book.price * (book.discount/100))
     let finalPrice = discount + (discount * (book.tax/100));
-    // finalPrice = book.discountprice + (book.discountprice * (book.tax/100));
     book.finalPrice = finalPrice
     res.json({
         book
         })
     })
 // KREDIT BUKU
-app.get('/credit/:creditAmount', authentication, function(req, res, next) {
+app.get('/credit/:creditAmount', authentication, function(req, res) {
     let {creditAmount} = req.params;
     let err;
     creditAmount = parseInt(creditAmount);
@@ -100,6 +109,37 @@ app.get('/credit/:creditAmount', authentication, function(req, res, next) {
     }
 })
 
+// JUAL BUKU
+app.get('/buyBook/:howMuch', authentication, function(req, res) {
+    let {howMuch} = req.params;
+    let purchasedBook = 0
+    let amountPrice = 0;
+    let discount = book.price - (book.price * (book.discount/100))
+    let finalPrice = discount + (discount * (book.tax/100));
+    let totalPrice = function(wantToBuy) {
+        for(let i= 1; i <= wantToBuy; i++){
+            if(book.stock){
+                amountPrice += finalPrice;
+                book.stock -= 1;
+                purchasedBook = i
+            }else{
+                break;
+            }
+        }}
+    let err;
+    howMuch = parseInt(howMuch);
+    if (Number.isNaN(howMuch)) {
+    err = new Error('Expected value of Integer');
+    res.send({
+        err : err.message
+    })
+    }else{
+    totalPrice(howMuch)
+    book.purchasedBook = purchasedBook;
+    book.amountPrice = amountPrice;
+    res.send(book );
+    }
+})
 // FUNGSI AUTENTIKASI
 function authentication(req, res, next) {
     let authheader = req.headers.authorization;
