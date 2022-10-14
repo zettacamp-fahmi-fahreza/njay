@@ -4,24 +4,21 @@ const songsPlaylist = [
             artist : 'Luis Fonsi',
             genre : 'Pop',
             duration : 4,
-            released : 2017,
-            sold : 38000000000
+            released : 2017
         },
         {
             title : 'Shape Of You',
             artist : 'Ed Sheeran',
             genre : 'Pop',
             duration : 5,
-            released : 2017,
-            sold : 42000000000
+            released : 2017
         },
         {
             title : 'Rock Around the Clock',
             artist : 'Maxamus Freedman',
             genre : 'Rock',
             duration : 5,
-            released : 2017,
-            sold : 25000000000
+            released : 2017
         },
         {
             title : 'Perfect',
@@ -77,24 +74,21 @@ const songsPlaylist = [
         artist : 'Luis Fonsi',
         genre : 'Pop',
         duration : 4,
-        released : 2017,
-        sold : 38000000000
+        released : 2017
     },
     {
         title : 'Shape Of You',
         artist : 'Ed Sheeran',
         genre : 'Pop',
         duration : 5,
-        released : 2017,
-        sold : 42000000000
+        released : 2017
     },
     {
         title : 'Rock Around the Clock',
         artist : 'Maxamus Freedman',
         genre : 'Rock',
         duration : 5,
-        released : 2017,
-        sold : 25000000000
+        released : 2017
     },
     {
         title : 'Perfect',
@@ -147,21 +141,19 @@ const songsPlaylist = [
     }
     
 ]
-
+// FILTER BY ARTIST
 function filterByArtist(arr, artist) {
     return arr.filter((song) => song.artist == artist);
   }
 
-
+// FILTER BY GENRE
 function filterByGenre(arr, genre) {
     return arr.filter((song) => song.genre == genre);
   }
 
-
-
+// FUNGSI UNTUK NYIMPEN DURASI
 function songDuration(songs){
     let duration = 0;
-
     if (songs.length === 0) {
         return duration;
     }
@@ -171,30 +163,39 @@ function songDuration(songs){
     });
     return duration;
     }
-function groupSong(arr, playFor = 60){
-    let song = [...arr];
+
+// FUNGSI UNTUK GROUP PLAYLIST
+function groupSong(arrObj, playFor){
+    let song = [...arrObj];
     let songToPlay = [];
-    while (true){
+    let duration = 0
+    while (duration < playFor){
         const songIndex = Math.floor(Math.random() * song.length);
         const songForPlay = song[songIndex];
         song.splice(songIndex, 1);
-        const duration = songDuration(songToPlay);
-        if (duration + songForPlay.duration  > playFor) {
+        duration = songDuration(songToPlay)  + songForPlay.duration;
+
+        if (duration > playFor) {
             break
         }else{
             songToPlay.push(songForPlay);
         }}
         console.log(songToPlay)
-        console.log(songDuration(songToPlay));
+        console.log(`Total Duration of Song Playlist: ${songDuration(songToPlay)}`);
+
+        
+        return true
     }
 
-// songDuration(songsPlaylist);
-console.log(groupSong(songsPlaylist))
 // console.log("\n=====Songs by Artist=====")
-// console.log(filterByArtist(songsPlaylist, 'Bruno Mars'));
+// console.log(filterByArtist(songsPlaylist, 'Ed Sheeran'));
 
 // console.log("======================\n")
 
 // console.log("\n=====Songs by Genre=====")
-// console.log(filterByGenre(songsPlaylist, 'Rock'));
+// console.log(filterByGenre(songsPlaylist, 'Pop'));
 // console.log("======================\n")
+
+console.log("\n=====Songs Playlist=====")
+console.log(groupSong(songsPlaylist, 60))
+console.log("======================\n")
