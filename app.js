@@ -12,14 +12,6 @@ const book = {
     tax :10
 }
 
-    // console.log(`The total price is:
-    // ${purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
-    // console.log(`Our available stock: ${book.stock}`)
-    // if(book.stock > 0){
-    //     console.log(`You can still buy ${book.stock} of our book`)
-    // }else{
-    //     console.log(`Im Sorry, but our book is out of stock`)
-    // }
 
 
 let creditFunction = (book, creditMonth) =>{
@@ -56,7 +48,7 @@ function addBook(book, amount) {
 
 const app = express();
 // TANPILIN BUKU
- app.get('/',authentication, function(req, res, next) {
+ app.get('/',authentication, function(req, res) {
     res.send(book);
      })
 // TAMBAHIN BUKU
@@ -122,6 +114,9 @@ app.get('/buyBook/:howMuch', authentication, function(req, res) {
                 amountPrice += finalPrice;
                 book.stock -= 1;
                 purchasedBook = i
+                book.purchasedBook = purchasedBook;
+                book.amountPrice = amountPrice;
+                
             }else{
                 break;
             }
@@ -135,8 +130,6 @@ app.get('/buyBook/:howMuch', authentication, function(req, res) {
     })
     }else{
     totalPrice(howMuch)
-    book.purchasedBook = purchasedBook;
-    book.amountPrice = amountPrice;
     res.send(book );
     }
 })
@@ -154,7 +147,6 @@ function authentication(req, res, next) {
         'base64').toString().split(':');
         let user = auth[0]
         let pass = auth[1];
-     
         if (user == 'admin' && pass == 'password') {
             next();
         } else {
