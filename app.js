@@ -12,22 +12,35 @@ const book = {
     tax :10
 }
 
-    // console.log(`The total price is:
-    // ${purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
-    // console.log(`Our available stock: ${book.stock}`)
-    // if(book.stock > 0){
-    //     console.log(`You can still buy ${book.stock} of our book`)
-    // }else{
-    //     console.log(`Im Sorry, but our book is out of stock`)
-    // }
 
+    
+async function getBook() {
+    let book1 = book
+    const time = 5000
+return new Promise((resolve, rejects)=>{
+setTimeout(()=>{
+resolve(book1)
+}, time)
+})
+        
+}
 
-let creditFunction = (book, creditMonth) =>{
-    const {price} = book
-    let credit = Math.ceil(price /creditMonth)
+// let addPrice =(interest) => {
+    
+//     monthlyPay.totalPriceCredit += interest
+//     console.log(interest)
+// }
+
+let creditFunction = async (creditMonth) =>{
+    const book = await getBook()
+    const {price} = await book
+    let interest = 5000
+
+    let credit = Math.ceil((price /creditMonth)+ interest)
     const monthlyPay = {
         credit,
         price,
+        interest,
         totalPriceCredit: 0
         }
     debt = credit * creditMonth
@@ -35,14 +48,14 @@ let creditFunction = (book, creditMonth) =>{
     let newArr = []
     for(let i = 0; i < creditMonth; i++) {
             monthlyPay.month = i +1;
-            monthlyPay.debt -= credit
+            monthlyPay.debt -= credit 
             monthlyPay.totalPriceCredit += credit;
             newArr.push({...monthlyPay})
     }
     newArr.map((e)=>{
         e.scheme=`Scheme Credit ${ e.month}`;
     })
-    console.log(newArr)
+    // console.log(newArr)
     book.monthlyPay = newArr
 }
 bookList= [];
@@ -94,7 +107,22 @@ app.get('/finalPrice',authentication, function(req, res) {
         })
     })
 // KREDIT BUKU
-app.get('/credit/:creditAmount', authentication, function(req, res) {
+// app.get('/credit/:creditAmount', authentication, function(req, res) {
+//     let {creditAmount} = req.params;
+//     let err;
+//     creditAmount = parseInt(creditAmount);
+//     if (Number.isNaN(creditAmount)) {
+//     err = new Error('Expected value of Integer');
+//     res.send({
+//         err : err.message
+//     })
+//     }else{
+//     creditFunction(book , creditAmount);
+//     res.send(book);
+//     }
+// })
+// KREDIT BUKU
+app.get('/creditNew/:creditAmount', authentication, async function(req, res) {
     let {creditAmount} = req.params;
     let err;
     creditAmount = parseInt(creditAmount);
@@ -104,7 +132,7 @@ app.get('/credit/:creditAmount', authentication, function(req, res) {
         err : err.message
     })
     }else{
-    creditFunction(book , creditAmount);
+    await creditFunction(creditAmount);
     res.send(book);
     }
 })
@@ -168,6 +196,14 @@ function authentication(req, res, next) {
     
  
 }
+ // console.log(`The total price is:
+    // ${purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
+    // console.log(`Our available stock: ${book.stock}`)
+    // if(book.stock > 0){
+    //     console.log(`You can still buy ${book.stock} of our book`)
+    // }else{
+    //     console.log(`Im Sorry, but our book is out of stock`)
+    // }
  
 // First step is the authentication of the client
 app.use(authentication)
