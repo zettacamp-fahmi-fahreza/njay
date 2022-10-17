@@ -12,11 +12,10 @@ const book = {
     tax :10
 }
 
-
     
 async function getBook() {
     let book1 = book
-    const time = 5000
+    const time = 2000
 return new Promise((resolve, rejects)=>{
 setTimeout(()=>{
 resolve(book1)
@@ -31,16 +30,14 @@ resolve(book1)
 //     console.log(interest)
 // }
 
-let creditFunction = async (creditMonth) =>{
+let creditFunction = async (creditMonth,interests) =>{
     const book = await getBook()
     const {price} = await book
-    let interest = 5000
-
-    let credit = Math.ceil((price /creditMonth)+ interest)
+    let credit = Math.ceil(((price /creditMonth)+ interests))
     const monthlyPay = {
         credit,
         price,
-        interest,
+        interests,
         totalPriceCredit: 0
         }
     debt = credit * creditMonth
@@ -122,17 +119,19 @@ app.get('/finalPrice',authentication, function(req, res) {
 //     }
 // })
 // KREDIT BUKU
-app.get('/creditNew/:creditAmount', authentication, async function(req, res) {
+app.get('/creditNew/:creditAmount/:interests', authentication, async function(req, res) {
     let {creditAmount} = req.params;
+    let {interests} = req.params;
     let err;
     creditAmount = parseInt(creditAmount);
-    if (Number.isNaN(creditAmount)) {
+    interests = parseInt(interests);
+    if (Number.isNaN(creditAmount) && Number.isNaN(interests)) {
     err = new Error('Expected value of Integer');
     res.send({
         err : err.message
     })
     }else{
-    await creditFunction(creditAmount);
+    await creditFunction(creditAmount,interests);
     res.send(book);
     }
 })
