@@ -1,5 +1,16 @@
 const express = require('express');
-let path = require('path');
+const path = require('path');
+const fs = require('fs').promises;
+const events = require('events');
+const { resolve } = require('path');
+
+const app = express();
+const eventEmitter = new events.EventEmitter();
+
+
+
+
+
 const book = {
     title : "Naruto",
     category : "Comics",
@@ -12,7 +23,6 @@ const book = {
     tax :10
 }
 
-    
 async function getBook() {
     let book1 = book
     const time = 2000
@@ -23,12 +33,6 @@ resolve(book1)
 })
         
 }
-
-// let addPrice =(interest) => {
-    
-//     monthlyPay.totalPriceCredit += interest
-//     console.log(interest)
-// }
 
 let creditFunction = async (creditMonth,interests) =>{
     const book = await getBook()
@@ -64,7 +68,7 @@ function addBook(book, amount) {
     return bookList;
 }
 
-const app = express();
+
 // TANPILIN BUKU
  app.get('/',authentication, function(req, res, next) {
     res.send(book);
@@ -118,7 +122,7 @@ app.get('/finalPrice',authentication, function(req, res) {
 //     res.send(book);
 //     }
 // })
-// KREDIT BUKU
+// KREDIT BUKU BARU
 app.get('/creditNew/:creditAmount/:interests', authentication, async function(req, res) {
     let {creditAmount} = req.params;
     let {interests} = req.params;
@@ -165,6 +169,40 @@ app.get('/buyBook/:howMuch', authentication, function(req, res) {
     book.purchasedBook = purchasedBook;
     book.amountPrice = amountPrice;
     res.send(book );
+    }
+})
+//ENDPOINT NO AWAIT
+app.get('/noAwait',authentication,(req, res)=>{
+    fs.readFile("./cisi.txt", "utf-8")
+    .then(function(result) {
+    console.log(result);
+    res.send("File Read Success!")
+    })
+    .catch(function(error) {
+    console.log(error);
+    res.send({
+        error: error.message
+    })
+    })
+    .finally(function() {
+    console.log("Ini Endpoint tanpa await \n")
+})
+console.log("GHALOWD NKJAEN ")})
+
+// ENDPOINT AWAIT
+app.get('/withAwait',async (req, res) =>{
+    try {
+        const data = await fs.readFile("./cisi.txt", "utf-8");
+        console.log(data);
+        console.log("This is Await \n")
+        res.send("File Read Success!");
+    }catch(err){
+        err = new Error('File Read Failed');
+        res.setHeader('WWW-Authenticate', 'Basic');
+        err.status = 401;
+        res.send({
+            err : err.message
+        });
     }
 })
 // FUNGSI AUTENTIKASI
