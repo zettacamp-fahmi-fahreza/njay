@@ -8,7 +8,16 @@ const app = express();
 const eventEmitter = new events.EventEmitter();
 
 
-
+const readFileEvent = async () => {
+    file= await fs.readFile("./cisi.txt", "utf-8")
+    console.log(file)
+  }
+  //Assign the event handler to an event:
+  eventEmitter.on('You', readFileEvent);
+  
+  //Fire the 'scream' event:
+  
+  
 
 
 const book = {
@@ -170,6 +179,11 @@ app.get('/buyBook/:howMuch', authentication, function(req, res) {
     book.amountPrice = amountPrice;
     res.send(book );
     }
+})
+
+app.get('/event',authentication,(req, res)=>{
+    eventEmitter.emit('You');
+    res.send("File Read Success!")
 })
 //ENDPOINT NO AWAIT
 app.get('/noAwait',authentication,(req, res)=>{
