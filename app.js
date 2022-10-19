@@ -34,13 +34,14 @@ const book = {
 
 async function getBook() {
     let book1 = book
-    const time = 2000
+    const time = 5000
 return new Promise((resolve, rejects)=>{
 setTimeout(()=>{
 resolve(book1)
 }, time)
+console.log("Ini Langaung Dieksekusi")
+
 })
-        
 }
 
 let creditFunction = async (creditMonth,interests) =>{
@@ -199,9 +200,8 @@ app.get('/noAwait',authentication,(req, res)=>{
     })
     })
     .finally(function() {
-    console.log("Ini Endpoint tanpa await \n")
-})
-console.log("GHALOWD NKJAEN ")})
+    console.log("Ini Endpoint tanpa await \n")})
+    console.log("TEST ")})
 
 // ENDPOINT AWAIT
 app.get('/withAwait',async (req, res) =>{
