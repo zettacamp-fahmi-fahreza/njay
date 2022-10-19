@@ -31,6 +31,47 @@ const book = {
     wantToBuy : 13,
     tax :10
 }
+const listBook1 = [
+    "Naruto",
+    "Comics",
+    "Masashi Kishimoto",
+    100000,
+    true,
+    10,
+    10,
+    13,
+    10
+]
+const mapBook = new Map();
+const setBook = new Set();
+
+
+app.post('/mapSet', express.urlencoded({extended:true}), (req,res)=>{
+    const {title} = req.body;
+    if (title){
+            if (setBook.has(title)) {
+                let err = new Error(`${title} is already there`)
+            throw err.message
+            }else{
+                mapBook.set(title, {...book, title});
+                setBook.add(title);
+                res.send(mapBook.get(title));
+                // res.send([...mapBook.keys(title)]);
+                // res.send([...mapBook.get(title)]);
+            }
+    }else{
+        let err = new Error("Title is Empty")
+        res.send( {
+            err: err.message
+        })
+    }
+})
+
+ app.get('/mapSet',(req,res)=>{
+    map = [...mapBook]
+    res.send(map)
+ })
+
 
 async function getBook() {
     let book1 = book
