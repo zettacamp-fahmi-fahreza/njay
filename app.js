@@ -28,8 +28,6 @@ const book = {
 }
 const mapBook = new Map();
 const setBook = new Set();
-
-
 app.post('/mapSet', express.urlencoded({extended:true}), (req,res)=>{
     const {title} = req.body;
     if (title){
@@ -46,18 +44,15 @@ app.post('/mapSet', express.urlencoded({extended:true}), (req,res)=>{
     }else{
         let err = new Error("Title is Empty")
         res.send( {
-            err: err.message
+        err: err.message
         })
     }
 })
-
  app.get('/mapSet',(req,res)=>{
     map = [...mapBook]
     console.log(map)
     res.send(map)
  })
-
-
 async function getBook() {
     let book1 = book
     const time = 2000
