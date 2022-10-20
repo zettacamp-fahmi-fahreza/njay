@@ -15,11 +15,6 @@ const readFileEvent = async () => {
   //Assign the event handler to an event:
   eventEmitter.on('You', readFileEvent);
   
-  //Fire the 'scream' event:
-  
-  
-
-
 const book = {
     title : "Naruto",
     category : "Comics",
@@ -31,17 +26,6 @@ const book = {
     wantToBuy : 13,
     tax :10
 }
-const listBook1 = [
-    "Naruto",
-    "Comics",
-    "Masashi Kishimoto",
-    100000,
-    true,
-    10,
-    10,
-    13,
-    10
-]
 const mapBook = new Map();
 const setBook = new Set();
 
@@ -57,7 +41,7 @@ app.post('/mapSet', express.urlencoded({extended:true}), (req,res)=>{
                 setBook.add(title);
                 res.send(mapBook.get(title));
                 // res.send([...mapBook.keys(title)]);
-                // res.send([...mapBook.get(title)]);
+                // res.send([...mapBook.values(title)]);
             }
     }else{
         let err = new Error("Title is Empty")
@@ -69,6 +53,7 @@ app.post('/mapSet', express.urlencoded({extended:true}), (req,res)=>{
 
  app.get('/mapSet',(req,res)=>{
     map = [...mapBook]
+    console.log(map)
     res.send(map)
  })
 
