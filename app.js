@@ -4,7 +4,6 @@ const fs = require('fs').promises;
 const events = require('events');
 const { resolve } = require('path');
 const jwt = require('jsonwebtoken');
-
 const app = express();
 const eventEmitter = new events.EventEmitter();
 //SONG PLAYLIST
@@ -151,7 +150,6 @@ const songsPlaylist = [
 }
 
 ]
-
 // FILTER BY ARTIST
 function filterByArtist(arr, artist) {
     return arr.filter((song) => song.artist == artist);
@@ -195,6 +193,28 @@ function groupSong(arrObj, playFor){
         // console.log(songToPlay)
         // console.log(`Total Duration of Song Playlist: ${songDuration(songToPlay)}`);
     }
+    // const users = {
+    //     user : "cisi",
+    //     password : "cisi"
+    // }
+    // app.get('/register',express.urlencoded({extended:true}),login ,function (req, res, next) {
+    // let {user,password} = req.body
+    // res.send(`${user} ${password}`)
+    // })
+
+    // function login(req, res, next) {
+    //     let user = req.body.user
+    //     let password = req.body.password
+    // if (user == users.user && password == users.password) {
+    //     res.send(password)
+    //     next()
+    // }else{
+    //     err.message = "Wrong"
+    //         res.send({
+    //             err : err.message
+    //         })
+    //     };
+    // }
 
     app.get('/authentication', (req,res,next) => {
         const authenticate = jwt.sign({
@@ -236,6 +256,23 @@ function authentication(req, res, next) {
             }
         });
     }
+
+
+
+express.urlencoded({extended:true}),function login(req, res, next) {
+    let {user,password} = req.body
+    let err = new Error()
+    if (user == users.user && password == users.password) {
+        next()
+    }else{
+        err.message = "Wrong"
+            res.send({
+                err : err.message
+            })
+        };
+    }
+
+}
     // console.log(decoded)
     // console.log(decoded.foo) 
     // if (decoded.data === "zetta") {
@@ -246,7 +283,7 @@ function authentication(req, res, next) {
     //         err : err.message
     //     })
     // }
-}
+// 
      //SHOW ARTIST
 // app.get('/artist/:artist',function(req, res, next) {
 //     let {artist} = req.params
