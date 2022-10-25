@@ -4,80 +4,113 @@ const fs = require('fs').promises;
 const events = require('events');
 const { resolve } = require('path');
 const mongoose = require('mongoose');
-const comic = require('./schema');
+const {comics, bookShelves} = require('./schema');
+// const bookShelves = require('./schema')
 
 const app = express();
 const eventEmitter = new events.EventEmitter();
 
 connectDB().catch(err => console.log(err));
 
-//   bookSchema.methods.dateUpdated = function(cb){
-//     if (cb.updated === 1) {
-//         cb.date_updated = new Date()
-//     }
-//   }
-
-
 async function connectDB() {
 await mongoose.connect('mongodb://localhost:27017/test');
-//   const naruto = new comic(
-//     {
-//         title: "Naruto",
-//         author: "Masashi Kishimoto",
-//         date_published: new Date('1999-09-21'),
-//         price : 100000,
-//         date_added: new Date(),
-//         updated :  1
-//     }
-// )
-// await comic.findByIdAndUpdate(
-// "635618ba4870e0b7a2111443",{
-//     $currentDate:{
-//         date_updated:true
-//     },
-//     $set:{
-        
-//     }
-// }
-// )
-// console.log(naruto.updated)
-// naruto.dateUpdated((err,comieec) =>{
-//     // comieec.date_updated = new Date()
-//     console.log(comieec);
-// })
-// console.log(naruto)
-//   await naruto.save();
-  // use `await mongoose.connect('mongodb://user:password@localhost:27017/test');` if your database has auth enabled
 }
 connectDB()
 
+//SHOW ALL  BOOKSHELVES
+app.get('/allBookShelves', async function(req, res, next) {
+    const showBookShelves = await bookShelves.find()
+    res.send(
+        showBookShelves
+    );})
+
+//READ BOOKSHELVES BY ID
+app.get('/bookShelves', express.urlencoded({extended:true}), async function(req, res, next) {
+    let {_id} = req.body
+    _id = _id.split(' ')
+    console.log(typeof(_id))
+    console.log(_id)
+    const filterByIDBookShelve = await bookShelves.find().elemMatch('books',{$in : _id})
+    // const filterByIDBookShelve = await bookShelves.find({books:{$all : _id}})
+    res.send(filterByIDBookShelve);
+})
+// CREATE BOOKSHELVES
+app.post('/bookShelves', express.urlencoded({extended:true}), async function(req, res, next) {
+    let {bookShelve} = req.body
+    bookShelve.books = bookShelve.books.split(' ')
+    const newBookShelve = new bookShelves(bookShelve)
+    await newBookShelve.save();
+    res.send(newBookShelve)
+})
+
+// UPDATE BOOKSHELVES BY ID
+app.patch('/bookShelves', express.urlencoded({extended:true}), async function(req, res, next) {
+    const {_id} = req.body
+    let {bookShelve} = req.body
+    bookShelve.books = bookShelve.books.split(' ')
+    if (!_id) {
+        let err = new Error("ID is wrong or empty")
+    res.send( {
+    err: err.message
+    })
+    }else{
+    const updateBookShelve = await bookShelves.findByIdAndUpdate(_id,bookShelve,{new:true});
+    res.send(
+    updateBookShelve
+    );
+    }
+})
+
+// DELETE BOOSHELF BY ID
+app.delete('/bookShelves', express.urlencoded({extended:true}), async function(req, res, next) {
+    const {_id} = req.body
+    if (!_id) {
+        let err = new Error("ID is wrong or empty")
+    res.send( {
+    err: err.message
+    })
+    }else{
+        const deleteBookShelve = await bookShelves.findByIdAndDelete(_id,{new: true})
+        res.send(
+            `You have deleted:
+            ${deleteBookShelve}`
+        );
+    }
+    })
+
+
 // SHOW BUKU
-app.get('/comic', async function(req, res, next) {
-    const showBook = await comic.find()
+app.get('/comics', async function(req, res, next) {
+    const showBook = await comics.find()
     res.send(
         showBook
     );})
 
+
 app.get('/findID/:id', async function(req, res, next) {
     const {id} = req.params
-    const showBook = await comic.findById(id)
+    const showBook = await comics.findById(id)
     res.send(showBook);
-    
 })
 
 // CREATE BOOK
-app.post('/comic', express.urlencoded({extended:true}), async function(req, res, next) {
+app.post('/comics', express.urlencoded({extended:true}), async function(req, res, next) {
     const {book} = req.body
     book.date_published = new Date(book.date_published)
     book.date_added = new Date()
-    const saveBook = new comic(book)
+    const saveBook = new comics(book)
     await saveBook.save();
     res.send(
         saveBook
     );
      })
 
-app.patch('/comic/:id', express.urlencoded({extended:true}), async function(req, res, next) {
+
+
+
+
+
+app.patch('/comics/:id', express.urlencoded({extended:true}), async function(req, res, next) {
     const {id} = req.params
     const {book} = req.body
     if (!id ) {
@@ -87,7 +120,7 @@ app.patch('/comic/:id', express.urlencoded({extended:true}), async function(req,
     })
     }else{
         book.date_updated = new Date()
-    const updateBook = await comic.findByIdAndUpdate(id,book,{new: true})
+    const updateBook = await comics.findByIdAndUpdate(id,book,{new: true})
     res.send(
     updateBook
     );
@@ -95,7 +128,7 @@ app.patch('/comic/:id', express.urlencoded({extended:true}), async function(req,
     })
 
 
-app.delete('/comic/:id', express.urlencoded({extended:true}), async function(req, res, next) {
+app.delete('/comics/:id', express.urlencoded({extended:true}), async function(req, res, next) {
     const {id} = req.params
     if (!id) {
         let err = new Error("ID is wrong or empty")
@@ -103,13 +136,16 @@ app.delete('/comic/:id', express.urlencoded({extended:true}), async function(req
     err: err.message
     })
     }else{
-        const deleteBook = await comic.findByIdAndDelete(id,{new: true})
+        const deleteBook = await comics.findByIdAndDelete(id,{new: true})
         res.send(
             `You have deleted:
             ${deleteBook}`
         );
     }
     })
+
+
+
 
 
 // Read File from local repo
@@ -122,7 +158,7 @@ const readFileEvent = async () => {
   
 const book = {
     title : "Naruto",
-    category : "Comics",
+    category : "comicss",
     author : "Masashi Kishimoto",
     price : 100000,
     onSale : true,
@@ -166,7 +202,6 @@ setTimeout(()=>{
 resolve(book1)
 }, time)
 })
-        
 }
 
 let creditFunction = async (creditMonth,interests) =>{

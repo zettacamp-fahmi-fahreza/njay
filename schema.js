@@ -10,7 +10,19 @@ const bookSchema = new mongoose.Schema({
     date_updated: Date,
     updated: Number,
   })
-const comic = mongoose.model('Book', bookSchema);
+const comics = mongoose.model('Book', bookSchema);
 
+const bookShelvesSchema = new mongoose.Schema({
+    name: String,
+    books : [
+        {
+            type : mongoose.Schema.Types.ObjectId,
+            default : ''
+        }
+    ]
+})
+const bookShelves = mongoose.model('bookShelves', bookShelvesSchema);
 
-  module.exports = comic;
+  module.exports.comics = comics;
+  module.exports.bookShelves = bookShelves;
+
