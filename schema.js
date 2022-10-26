@@ -17,7 +17,8 @@ const bookShelvesSchema = new mongoose.Schema({
     books : [
         {
             type : mongoose.Schema.Types.ObjectId,
-            default : ''
+            default : '',
+            ref : 'Book'
         }
     ]
 })

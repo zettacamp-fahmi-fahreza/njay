@@ -19,7 +19,8 @@ connectDB()
 
 //SHOW ALL  BOOKSHELVES
 app.get('/allBookShelves', async function(req, res, next) {
-    const showBookShelves = await bookShelves.find()
+    const showBookShelves = await bookShelves.find().
+    populate('books', "title");
     res.send(
         showBookShelves
     );})
@@ -54,7 +55,7 @@ app.patch('/bookShelves', express.urlencoded({extended:true}), async function(re
     err: err.message
     })
     }else{
-    const updateBookShelve = await bookShelves.findByIdAndUpdate(_id,bookShelve,{new:true});
+    const updateBookShelve = await bookShelves.findByIdAndUpdate(_id,bookShelve,{new:true})
     res.send(
     updateBookShelve
     );
