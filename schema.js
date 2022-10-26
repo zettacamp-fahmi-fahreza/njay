@@ -1,5 +1,5 @@
-const express = require('express');
-const mongoose = require('mongoose');
+const express = require("express");
+const mongoose = require("mongoose");
 
 const bookSchema = new mongoose.Schema({
     title: String,
@@ -9,21 +9,50 @@ const bookSchema = new mongoose.Schema({
     date_added: Date,
     date_updated: Date,
     updated: Number,
-  })
-const comics = mongoose.model('Book', bookSchema);
+});
 
-const bookShelvesSchema = new mongoose.Schema({
-    name: String,
-    books : [
-        {
-            type : mongoose.Schema.Types.ObjectId,
-            default : '',
-            ref : 'Book'
-        }
-    ]
-})
-const bookShelves = mongoose.model('bookShelves', bookShelvesSchema);
+const objDate = new Date();
+const comics = mongoose.model("Book", bookSchema);
 
-  module.exports.comics = comics;
-  module.exports.bookShelves = bookShelves;
+const bookShelvesSchema = new mongoose.Schema(
+    {
+        name: String,
+        books: [
+            {
+                _id: false,
+                book_id: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    default: "",
+                    ref: "Book",
 
+                },
+                added_date: {
+                    type: Date,
+                },
+                stock: {
+                    type: Number,
+                    default: 0,
+                },
+            },
+        ],
+        date: [
+            {
+                _id: false,
+                date: {
+                    type: Date,
+                    //   default: new Date(),
+                },
+                time: {
+                    type: String,
+                    default: `${objDate.getHours()}:${objDate.getMinutes()}`,
+                },
+            },
+        ],
+    },
+    { timestamps: true },
+    { strict: false }
+);
+const bookShelves = mongoose.model("bookShelves", bookShelvesSchema);
+
+module.exports.comics = comics;
+module.exports.bookShelves = bookShelves;
