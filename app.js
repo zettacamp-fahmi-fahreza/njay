@@ -212,12 +212,17 @@ app.get("/allComics",express.urlencoded({ extended: true }), async function (req
 
     const showBook = await comics.aggregate([
         {$addFields:{
-            rating_star: rating_star
+            rating_star: rating_star,
+            description : {$concat:
+                ["Book Name: ", "$title"," | ","Author: ","$author"]
+            }
         }},
         {
             $addFields:{
                 avg_rating : {$round:[{$avg:"$rating_star"},1]}
             }
+        },{
+            $sort: {price: -1}
         }
     ]);
     res.send(showBook);
@@ -229,6 +234,7 @@ app.get("/comics/:id", async function (req, res, next) {
     // const showBook = await comics.findById(id);
     const showBook = await comics.aggregate([
         {$match: {_id : _id}},
+        // {$match: {price : {$gt: 100000, $lt:300000}}},
         {$project:{title : 1, author : 1,_id:0, price : 1}},
     ])
     console.log(showBook)
