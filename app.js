@@ -33,15 +33,29 @@ app.get("/allBookShelves", async function (req, res, next) {
 app.get("/bookShelves",express.urlencoded({ extended: true }),async function (req, res, next) {
         try{
             let { _id } = req.body;
+            _id = mongoose.Types.ObjectId(_id)
             if (!_id ) {
                 let err = new Error("ID is wrong or empty");
                 res.send({
                     err: err.message,
                 });
             } else {
-                _id = _id.split(" ");
-                const filterByIDBookShelve = await bookShelves.find()
-                .elemMatch("books", { book_id: { $in: _id } });
+                //SHOW BOOK AND CAN RECEIVE MORE THAN 1 ID'S
+                // _id = _id.split(" ");
+                // const filterByIDBookShelve = await bookShelves.find()
+                // .elemMatch("books", { book_id: { $in: _id } }).populate({
+                //     path: "books",
+                //     populate: {
+                //         path: "book_id",
+                //         select: "title author"
+                //     }
+                // });
+
+                const filterByIDBookShelve = await bookShelves.aggregate([
+                    {$match: {"books.book_id" : _id}},
+                    {$unwind:"$books" },
+                    {$project:{_id: 0,date:0,createdAt:0,updatedAt:0,__v:0}}
+                ])
             // const filterByIDBookShelve = await bookShelves.find({'books.book_id':{$all : _id}})
             // console.log(filterByIDBookShelve)
             res.send(filterByIDBookShelve);
@@ -191,14 +205,33 @@ app.delete(
 );
 
 // SHOW BUKU
-app.get("/comics", async function (req, res, next) {
-    const showBook = await comics.find();
+app.get("/allComics",express.urlencoded({ extended: true }), async function (req, res, next) {
+    let {rating_star} = req.body
+    rating_star = rating_star.split(",").map(Number)
+    // let stockArr = [stock]
+
+    const showBook = await comics.aggregate([
+        {$addFields:{
+            rating_star: rating_star
+        }},
+        {
+            $addFields:{
+                avg_rating : {$round:[{$avg:"$rating_star"},1]}
+            }
+        }
+    ]);
     res.send(showBook);
 });
 
-app.get("/findID/:id", async function (req, res, next) {
-    const { id } = req.params;
-    const showBook = await comics.findById(id);
+app.get("/comics/:id", async function (req, res, next) {
+    let { id } = req.params;
+    let _id = mongoose.Types.ObjectId(id)
+    // const showBook = await comics.findById(id);
+    const showBook = await comics.aggregate([
+        {$match: {_id : _id}},
+        {$project:{title : 1, author : 1,_id:0, price : 1}},
+    ])
+    console.log(showBook)
     res.send(showBook);
 });
 
