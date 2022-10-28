@@ -221,7 +221,7 @@ app.get("/allComics",express.urlencoded({ extended: true }), async function (req
             rating_star: rating_star,
             description : {$concat:
                 ["Book Name: ", "$title"," | ","Author: ","$author"]
-            }
+            } 
         }},
         {
             $addFields:{
