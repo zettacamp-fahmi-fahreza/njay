@@ -54,7 +54,13 @@ app.get("/bookShelves",express.urlencoded({ extended: true }),async function (re
                 const filterByIDBookShelve = await bookShelves.aggregate([
                     {$match: {"books.book_id" : _id}},
                     {$unwind:"$books" },
-                    {$project:{_id: 0,date:0,createdAt:0,updatedAt:0,__v:0}}
+                    {$lookup:{
+                            from: "books",
+                            localField: "books.book_id",
+                            foreignField: "_id",
+                            as: "test"
+                        }},
+                    {$project:{_id: 0,date:0,createdAt:0,updatedAt:0,__v:0,}},
                 ])
             // const filterByIDBookShelve = await bookShelves.find({'books.book_id':{$all : _id}})
             // console.log(filterByIDBookShelve)
