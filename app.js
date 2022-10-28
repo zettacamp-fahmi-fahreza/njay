@@ -5,7 +5,6 @@ const events = require("events");
 const { resolve } = require("path");
 const mongoose = require("mongoose");
 const { comics, bookShelves } = require("./schema");
-// const bookShelves = require('./schema')
 
 const app = express();
 const eventEmitter = new events.EventEmitter();
@@ -58,7 +57,7 @@ app.get("/bookShelves",express.urlencoded({ extended: true }),async function (re
                             from: "books",
                             localField: "books.book_id",
                             foreignField: "_id",
-                            as: "test"
+                            as: "book_details"
                         }},
                     {$project:{_id: 0,date:0,createdAt:0,updatedAt:0,__v:0,}},
                 ])
@@ -96,45 +95,7 @@ app.post("/bookShelves",express.urlencoded({ extended: true }),
     }
 );
 
-// UPDATE BOOKSHELVES BY ID
-// app.patch(
-//   "/bookShelves",
-//   express.urlencoded({ extended: true }),
-//   async function (req, res, next) {
-//     let { _id, date, new_date } = req.body;
-//     // let {bookShelve} = req.body
-//     let cek = "";
-//     // bookShelve.books = bookShelve.books.split(' ')
-//     if (!_id) {
-//       let err = new Error("ID is wrong or empty");
-//       res.send({
-//         err: err.message,
-//       });
-//     } else {
-//       cek = await bookShelves.updateOne(
-//         { _id: mongoose.Types.ObjectId(_id) },
-//         {
-//           $set: {
-//             "date.$[idx].date": new Date(new_date),
-//           },
-//         },
-//         {
-//           arrayFilters: [
-//             {
-//               "idx.date": {
-//                 $lte: Date(date),
-//               },
-//             },
-//           ],
-//         }
-//       );
-//       console.log(cek);
-//       //   const updatedBookShelf = await bookShelves.findById(_id);
-//       //   res.send(updatedBookShelf);
-//       res.send(cek);
-//     }
-//   }
-// );
+
 app.patch("/bookShelves",express.urlencoded({ extended: true }),
     async (req, res, next) => {
         try {
@@ -214,21 +175,20 @@ app.delete(
 app.get("/allComics",express.urlencoded({ extended: true }), async function (req, res, next) {
     let {rating_star} = req.body
     rating_star = rating_star.split(",").map(Number)
-    // let stockArr = [stock]
 
     const showBook = await comics.aggregate([
         {$addFields:{
             rating_star: rating_star,
-            description : {$concat:
-                ["Book Name: ", "$title"," | ","Author: ","$author"]
-            } 
-        }},
+            // description : {$concat:
+            //     ["Book Name: ", "$title"," | ","Author: ","$author"]
+            // } 
+        }}, 
         {
             $addFields:{
                 avg_rating : {$round:[{$avg:"$rating_star"},1]}
             }
         },{
-            $sort: {price: -1}
+            $sort: {price: 1}
         }
     ]);
     res.send(showBook);
