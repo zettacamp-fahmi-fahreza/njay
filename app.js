@@ -195,23 +195,18 @@ app.get("/allComics",express.urlencoded({ extended: true }), async function (req
     ]);
     res.send(showBook);
 });
-app.get("/categorizedBooks",async function(req, res,next){
-    let err = new Error("Please Insert number");
-    res.status(400).send({
-        err: err.message,
-    });
-})
-app.get("/categorizedBooks/:page", async function (req, res, next) {
-    let {page} = req.params
-    page = parseInt(page)
-    let pages = page *2
-    if (page <0 ){
+app.get("/categorizedBooks/",express.urlencoded({ extended: true }), async function (req, res, next) {
+    let {skip} = req.body
+    let {limit} = req.body
+    skip = parseInt(skip)
+    limit = parseInt(limit)
+    // let skips = skip *2
+    if (skip <0 || limit <= 0){
         let err = new Error("Please Insert Approppriate number");
             res.send({
                 err: err.message,
             });
     }else{
-        
         const categorizedBooks = await comics.aggregate([
             {$facet: {
                 "categorizedByAuthor":[
@@ -219,9 +214,9 @@ app.get("/categorizedBooks/:page", async function (req, res, next) {
                         {_id: {author : "$author"}, 
                         totalBooksWritten: {$sum:1}
                     }},{
-                        $skip:pages,
+                        $skip:skip,
                     },{
-                        $limit:2
+                        $limit:limit
                     }
                 ],
                 "categorizedByPrice":[
@@ -236,17 +231,19 @@ app.get("/categorizedBooks/:page", async function (req, res, next) {
                             }
                         }
                     },{
-                        $skip:pages,
+                        $skip:skip,
                     },
                     {
-                        $limit:2
+                        $limit:limit
                     }
                 ]
             }},{$addFields:{
-                page: page+1
+                skip: skip
             }}
         ])
-        res.send(categorizedBooks);
+            res.send(categorizedBooks);
+        
+        
     }
    
 });
