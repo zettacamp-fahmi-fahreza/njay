@@ -237,10 +237,13 @@ app.get("/categorizedBooks/:page", async function (req, res, next) {
                         }
                     },{
                         $skip:pages,
-                    },{
+                    },
+                    {
                         $limit:2
                     }
                 ]
+            }},{$addFields:{
+                page: page+1
             }}
         ])
         res.send(categorizedBooks);
