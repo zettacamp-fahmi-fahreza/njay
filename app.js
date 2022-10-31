@@ -28,6 +28,8 @@ app.get("/allBookShelves", async function (req, res, next) {
     res.send(showBookShelves);
 });
 
+
+
 //READ BOOKSHELVES BY ID
 app.get("/bookShelves",express.urlencoded({ extended: true }),async function (req, res, next) {
         try{
@@ -192,6 +194,46 @@ app.get("/allComics",express.urlencoded({ extended: true }), async function (req
         }
     ]);
     res.send(showBook);
+});
+app.get("/categorizedBooks", async function (req, res, next) {
+    const categorizedBooks = await comics.aggregate([
+        {$facet: {
+            "categorizedByAuthor":[
+                {$group: 
+                    {_id: {author : "$author"}, 
+                    totalBooksWritten: {$sum:1}
+                }},{
+                    $skip:0,
+                },{
+                    $limit:2
+                }
+            ],
+            "categorizedByPrice":[
+                {
+                    $bucket: {
+                        groupBy: "$price",
+                        boundaries: [20000,50000,100000,150000,200000,250000,300000],
+                        default: "Other",
+                        output: {
+                            "count": {$sum:1},
+                            "titles": {$push: "$title"}
+                        }
+                    }
+                },{
+                    $skip:0,
+                },{
+                    $limit:2
+                }
+            ]
+        }},
+        // {$group: 
+        //     {_id: {author : "$author"}, 
+        //     totalBooksWritten: {$sum:1}
+        // }},
+        // {$limit: 2},
+        // {$skip:2}
+    ])
+    res.send(categorizedBooks);
 });
 
 app.get("/comics/:id", async function (req, res, next) {
