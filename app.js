@@ -8,6 +8,12 @@ const app = express();
 const eventEmitter = new events.EventEmitter();
 const mongoose = require('mongoose');
 const {songs,songPlaylist} = require('./schema');
+
+connectDB().catch((err) => console.log(err));
+async function connectDB() {
+    await mongoose.connect("mongodb://localhost:27017/zetta");
+}
+connectDB();
 //SONG PLAYLIST
 const songsPlaylist = [
     {
@@ -217,6 +223,12 @@ function groupSong(arrObj, playFor){
     //         })
     //     };
     // }
+
+    app.post('/songs',express.urlencoded({extended:true}),async (req, res, next)=>{
+        const {song} = req.body;
+        
+
+    })
 
     app.get('/authentication', (req,res,next) => {
         const authenticate = jwt.sign({

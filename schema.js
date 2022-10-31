@@ -2,11 +2,26 @@ const express = require('express');
 const mongoose = require('mongoose');
 
 const songSchema = new mongoose.Schema({
-            title : String,
-            artist : String,
-            genre : String,
-            duration : Number,
-            released : Date
+            title : {
+                type:String,
+                default:"title"
+            },
+            artist :  {
+                type:String,
+                default:"title"
+            },
+            genre :  {
+                type:String,
+                default:"title"
+            },
+            duration :  {
+                type:String,
+                default:"title"
+            },
+            released :  {
+                type:Date,
+                default:new Date()
+            },
 })
 const songs = mongoose.model("Songs",songSchema)
 
