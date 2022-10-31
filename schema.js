@@ -8,15 +8,15 @@ const songSchema = new mongoose.Schema({
             },
             artist :  {
                 type:String,
-                default:"title"
+                default:"artist"
             },
             genre :  {
                 type:String,
-                default:"title"
+                default:"genre"
             },
             duration :  {
-                type:String,
-                default:"title"
+                type:Number,
+                default:0
             },
             released :  {
                 type:Date,
@@ -33,7 +33,10 @@ const songPlaylistSchema = new mongoose.Schema({
             ref:"Songs"
         }
     ],
-    totalDuration : Number
+    totalDuration : {
+        type: Number,
+        default: 0
+    }
 })
 const songPlaylist = mongoose.model("songPlaylist", songPlaylistSchema);
 

@@ -224,12 +224,86 @@ function groupSong(arrObj, playFor){
     //     };
     // }
 
-    app.post('/songs',express.urlencoded({extended:true}),async (req, res, next)=>{
-        const {song} = req.body;
-        
-
+    app.get('/songs/:_id',async (req, res, next)=>{
+        let {_id} = req.params;
+        _id = mongoose.Types.ObjectId(_id)
+        const displaySong = await songs.aggregate([
+            {$match: {_id: _id}}
+        ])
+        res.send(displaySong)
     })
 
+    app.post('/songs',express.urlencoded({extended:true}),async (req, res, next)=>{
+        const {song} = req.body;
+        const saveSong = new songs(song)
+        await saveSong.save();
+        res.send(saveSong)
+    })
+
+    app.patch('/songs/:_id',express.urlencoded({extended:true}),async (req, res, next)=>{
+        const {_id} = req.params;
+        const {song} = req.body;
+        // _id = mongoose.Types.ObjectId(_id)
+        if (!_id) {
+            let err = new Error("ID is wrong or empty");
+            res.send({
+                err: err.message,
+            });
+        } else {
+            const updateSong = await songs.findByIdAndUpdate(_id, song, {
+                new: true,
+            });
+            res.send(updateSong);
+        }
+    })
+
+    app.delete(
+        "/songs/:_id",
+        express.urlencoded({ extended: true }),
+        async function (req, res, next) {
+            const { _id } = req.params;
+            if (!_id) {
+                let err = new Error("ID is wrong or empty");
+                res.send({
+                    err: err.message,
+                });
+            } else {
+                const deleteSong = await songs.findByIdAndDelete(_id, { new: true });
+                res.send(
+                    `You have deleted:
+                ${deleteSong}`
+                );
+            }
+        }
+    );
+
+    app.post('/playlist',express.urlencoded({extended:true}),async (req, res, next)=>{
+        let {playlist} = req.body;
+        playlist.songs = playlist.songs.split(" ").map((el)=>{
+            return mongoose.Types.ObjectId(el)
+        })
+        
+            // songs = mongoose.Types.ObjectId(playlist.songs)
+        const savePlaylist = new songPlaylist(playlist)
+        // await savePlaylist.save();
+        let aggregate = await songPlaylist.aggregate([
+            {
+                $lookup:{
+                    from: "songs",
+                    localField: "songs",
+                    foreignField: "_id",
+                    as:"song_detail"
+                }
+            },{
+                $addFields:{totallDur:{$sum: "$song_detail.duration"}}
+            }
+        ])
+        
+        res.send(aggregate)
+    })
+
+
+    
     app.get('/authentication', (req,res,next) => {
         const authenticate = jwt.sign({
             data: 'zetta'
@@ -237,7 +311,7 @@ function groupSong(arrObj, playFor){
         res.send(authenticate)
         console.log(authenticate)
     })
-    app.use(authentication)
+    // app.use(authentication)
 
 
 
