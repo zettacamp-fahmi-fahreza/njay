@@ -33,10 +33,10 @@ const songPlaylistSchema = new mongoose.Schema({
             ref:"Songs"
         }
     ],
-    totalDuration : {
-        type: Number,
-        default: 0
-    }
+    // totalDuration : {
+    //     type: Number,
+    //     default: 0
+    // }
 })
 const songPlaylist = mongoose.model("songPlaylist", songPlaylistSchema);
 

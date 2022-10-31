@@ -292,15 +292,25 @@ function groupSong(arrObj, playFor){
                     from: "songs",
                     localField: "songs",
                     foreignField: "_id",
-                    as:"song_detail"
+                    as:"songs.song_detail"
                 }
             },{
-                $addFields:{totallDur:{$sum: "$song_detail.duration"}}
+                $addFields:{totalDuration:{$sum: "$song_detail.duration"}}
             }
         ])
-        
         res.send(aggregate)
     })
+    //GET ALL PLAYLIST
+    // app.get('/playlist',express.urlencoded({extended:true}),async (req, res, next)=>{
+    //     let {_id} = req.body;
+    //     _id = _id.split(" ").map((el)=>{
+    //         return mongoose.Types.ObjectId(el)
+    //     })
+    //     const displayPlaylist = await path;.aggregate([
+    //         {$match: {_id: _id}}
+    //     ])
+    //     res.send(displaySong)
+    // })
 
 
     
