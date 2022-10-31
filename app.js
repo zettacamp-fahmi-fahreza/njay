@@ -6,6 +6,8 @@ const { resolve } = require('path');
 const jwt = require('jsonwebtoken');
 const app = express();
 const eventEmitter = new events.EventEmitter();
+const mongoose = require('mongoose');
+const {songs,songPlaylist} = require('./schema');
 //SONG PLAYLIST
 const songsPlaylist = [
     {
