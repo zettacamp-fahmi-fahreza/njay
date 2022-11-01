@@ -230,11 +230,12 @@ function groupSong(arrObj, playFor){
     });
 
     app.get("/allPlaylist",express.urlencoded({ extended: true }), async function (req, res, next) {
-        let {match,sort,page,limit} = req.body;
+        let {match,sort,page,limit=1} = req.body;
         // rating_star = rating_star.split(",").map(Number)
         sort = parseInt(sort)
         page = parseInt(page)
         limit = parseInt(limit)
+        // match = mongoose.Types.ObjectId(match)
         const showPlaylist = await songPlaylist.aggregate([
             {
                 $lookup:{
@@ -247,7 +248,6 @@ function groupSong(arrObj, playFor){
                         totalDuration:{$sum: "$songs.song_detail.duration"}}
             },{
                 $facet: {
-                    
                     count: [
                         {
                             $group: {
@@ -265,12 +265,13 @@ function groupSong(arrObj, playFor){
                         {$sort:{playlistName: sort}},
                         {$match:{
                             "songs.song_detail.artist": match
+                            // "songs.song_detail._id": match
                         }},
                         {$skip: page * limit},
                         {$limit: limit},
-                        {$addFields:{
-                            page:`${page} / ${Math.floor(await songPlaylist.count()/limit)}`
-                        }}
+                        // {$addFields:{
+                        //     page:`${page} / ${Math.floor(await songPlaylist.count()/limit)}`
+                        // }}
                     ]
                 }
             }
