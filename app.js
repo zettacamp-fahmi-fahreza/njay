@@ -14,7 +14,6 @@ async function connectDB() {
     await mongoose.connect("mongodb://localhost:27017/zetta");
 }
 connectDB();
-//SONG PLAYLIST
 const songsPlaylist = [
     {
         title : 'Despacito',
@@ -158,15 +157,12 @@ const songsPlaylist = [
 }
 
 ]
-// FILTER BY ARTIST
 function filterByArtist(arr, artist) {
     return arr.filter((song) => song.artist == artist);
   }
-// FILTER BY GENRE
 function filterByGenre(arr, genre) {
     return arr.filter((song) => song.genre == genre);
   }
-// SAVE THE SONG DURATION
 function songDuration(songs){
     let duration = 0;
     if (songs.length === 0) {
@@ -198,32 +194,89 @@ function groupSong(arrObj, playFor){
         const words = `Total Duration of Song Playlist: ${songDuration(songToPlay)}`
 
         return {...songToPlay, 'Total Duration' : words};
-        // console.log(songToPlay)
-        // console.log(`Total Duration of Song Playlist: ${songDuration(songToPlay)}`);
     }
-    // const users = {
-    //     user : "cisi",
-    //     password : "cisi"
-    // }
-    // app.get('/register',express.urlencoded({extended:true}),login ,function (req, res, next) {
-    // let {user,password} = req.body
-    // res.send(`${user} ${password}`)
-    // })
+    
 
-    // function login(req, res, next) {
-    //     let user = req.body.user
-    //     let password = req.body.password
-    // if (user == users.user && password == users.password) {
-    //     res.send(password)
-    //     next()
-    // }else{
-    //     err.message = "Wrong"
-    //         res.send({
-    //             err : err.message
-    //         })
-    //     };
-    // }
+    app.get('/authentication', (req,res,next) => {
+        const authenticate = jwt.sign({
+            data: 'zetta'
+          }, 'secret', { expiresIn: '1h' });
+        res.send(authenticate)
+        console.log(authenticate)
+    })
+    app.use(authentication)
 
+    app.get("/allSongs",express.urlencoded({ extended: true }), async function (req, res, next) {
+        let {match,sort,skip,limit} = req.body;
+        sort = parseInt(sort)
+        const showSongs = await songs.aggregate([
+            {$facet: {
+                "categorizedByArtist" :[
+                    {$match : {
+                        artist : match
+                    }},{
+                        $sort: {title : sort}
+                    }
+                ]
+                ,"categorizedByGenre" :[
+                    {$group:{
+                        _id: "$genre",
+                        totalSong: {$sum: 1}
+                    }}
+                ]
+            }}
+        ]);
+        res.send(showSongs);
+    });
+
+    app.get("/allPlaylist",express.urlencoded({ extended: true }), async function (req, res, next) {
+        let {match,sort,page,limit} = req.body;
+        // rating_star = rating_star.split(",").map(Number)
+        sort = parseInt(sort)
+        page = parseInt(page)
+        limit = parseInt(limit)
+        const showPlaylist = await songPlaylist.aggregate([
+            {
+                $lookup:{
+                    from: "songs",
+                    localField: "songs",
+                    foreignField: "_id",
+                    as:"songs.song_detail"
+                }},{
+                    $addFields:{
+                        totalDuration:{$sum: "$songs.song_detail.duration"}}
+            },{
+                $facet: {
+                    
+                    count: [
+                        {
+                            $group: {
+                                _id: null,
+                                totalDocs: { $sum: 1 }
+                            }
+                        },
+                        {
+                            $project: {
+                                _id: 0
+                            }
+                        }
+                    ],
+                    data: [
+                        {$sort:{playlistName: sort}},
+                        {$match:{
+                            "songs.song_detail.artist": match
+                        }},
+                        {$skip: page * limit},
+                        {$limit: limit},
+                        {$addFields:{
+                            page:`${page} / ${Math.floor(await songPlaylist.count()/limit)}`
+                        }}
+                    ]
+                }
+            }
+        ]);
+        res.send(showPlaylist);
+    });
     app.get('/songs/:_id',async (req, res, next)=>{
         let {_id} = req.params;
         _id = mongoose.Types.ObjectId(_id)
@@ -282,46 +335,96 @@ function groupSong(arrObj, playFor){
         playlist.songs = playlist.songs.split(" ").map((el)=>{
             return mongoose.Types.ObjectId(el)
         })
-        
-            // songs = mongoose.Types.ObjectId(playlist.songs)
         const savePlaylist = new songPlaylist(playlist)
-        // await savePlaylist.save();
-        let aggregate = await songPlaylist.aggregate([
-            {
-                $lookup:{
-                    from: "songs",
-                    localField: "songs",
-                    foreignField: "_id",
-                    as:"songs.song_detail"
-                }
-            },{
-                $addFields:{totalDuration:{$sum: "$song_detail.duration"}}
-            }
-        ])
-        res.send(aggregate)
+        await savePlaylist.save();
+        // let aggregate = await songPlaylist.aggregate([
+            // {
+            //     $lookup:{
+            //         from: "songs",
+            //         localField: "songs",
+            //         foreignField: "_id",
+            //         as:"songs.song_detail"
+            //     }
+            // },{
+        //         $addFields:{totalDuration:{$sum: "$song_detail.duration"}}
+        //     }
+        // ])
+        res.send(savePlaylist)
     })
-    //GET ALL PLAYLIST
-    // app.get('/playlist',express.urlencoded({extended:true}),async (req, res, next)=>{
-    //     let {_id} = req.body;
-    //     _id = _id.split(" ").map((el)=>{
-    //         return mongoose.Types.ObjectId(el)
-    //     })
-    //     const displayPlaylist = await path;.aggregate([
-    //         {$match: {_id: _id}}
-    //     ])
-    //     res.send(displaySong)
-    // })
+    
+    app.get('/playlist',express.urlencoded({extended:true}),async (req, res, next)=>{
+        try{
+            let {_id} = req.body;
+            
+            if(!_id){
+                let err = new Error("ID is wrong or empty");
+                res.send({
+                    err: err.message,
+                });
+            }else{
+                _id = _id.split(" ").map((el)=>{
+                    return mongoose.Types.ObjectId(el)
+                })
+                const displayPlaylist = await songPlaylist.aggregate([
+                    {$match: {$or:[
+                        {songs: _id[0]},{songs: _id[1]}
+                    ]}},
+                    {
+                        $lookup:{
+                            from: "songs",
+                            localField: "songs",
+                            foreignField: "_id",
+                            as:"songs.song_detail"
+                        }
+                    },
+                    
+                ])
+                res.send(displayPlaylist)
+            } 
+        }catch(err) {
+            res.send(err)
+        }
+    })
 
+    app.patch("/playlist",express.urlencoded({extended:true}),async (req, res, next)=>{
+        try{
+            let {_id,playlist} = req.body;
+            if(!_id){
+                let err = new Error("ID is wrong or empty");
+                res.send({
+                    err: err.message,
+                });
+            }else{
+                _id = mongoose.Types.ObjectId(_id)
+            const updatePlaylist = await songPlaylist.findByIdAndUpdate(_id, playlist, {
+                new: true,
+            });
+            res.send(updatePlaylist);
+        }
+        }catch(err){
+            next(err)
+        }
+    });
+
+    app.delete("/playlist",express.urlencoded({extended: true}),async(req, res, next)=>{
+        const {_id} = req.body;
+        if (!_id) {
+            let err = new Error("ID is wrong or empty");
+            res.send({
+                err: err.message,
+            });
+        } else {
+            const deletePlaylist = await songPlaylist.findByIdAndDelete(_id, {
+                new: true,
+            });
+            res.send(
+                `You have deleted:
+            ${deletePlaylist}`
+            )};
+    });
 
     
-    app.get('/authentication', (req,res,next) => {
-        const authenticate = jwt.sign({
-            data: 'zetta'
-          }, 'secret', { expiresIn: '1h' });
-        res.send(authenticate)
-        console.log(authenticate)
-    })
-    // app.use(authentication)
+
 
 
 
@@ -413,23 +516,43 @@ app.get('/groupSong/:duration',function(req, res, next) {
     })
 
 
+    // async function SongsGeneratorEN(){
+    //     let index = 1;
+    //     let titleEn =
+    //     [
+    //     'Cool Off Moves',
+    //     'Slump Summertime',
+    //     'Calm Options',
+    //     'Black Flies',
+    //     'Forget About Your Influence',
+    //     '100 Years',
+    //     'A Time Of Gem',
+    //     'Hymn Of Conversation',
+    //     'Private Driving',
+    //     'The Teenager','Talking To The Moon','Solid','Thats What I Like','Runaway Baby'
+    //     ];
+        
+    //     let artistFEn = ['Boy', 'Dona', 'Luke', 'Bruno', 'The', 'Asking', 'Aria', 'Michael'];
+    //     let artistLEn = ['Swift', 'Sarasvati', 'Gold', 'Jonas', 'Alexandria', 'Reeves', 'Pichu']
+        
+    //     let genre = ['EDM', 'Pop', 'Rock'];
+    //     let duration = [3,3,4,4,5,5,6,4,5,2,4];
+        
+    //     for (let [id, val] of titleEn.entries()){
+    //     let result = await new songs({
+    //     // index : index,
+    //     title: `${val}`,
+    //     artist: `${artistFEn[Math.floor(Math.random() * artistFEn.length)]} ${artistLEn[Math.floor(Math.random() * artistLEn.length)]}`,
+    //     genre: `${genre[Math.floor(Math.random() * genre.length)]}`,
+    //     duration: `${duration[Math.floor(Math.random() * duration.length)]}`,
+    //     released: new Date()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+    //     })
+        
+    //     console.log(result)
+    //     result.save()
+    //     // index++
+    //     }}
 
 
 
