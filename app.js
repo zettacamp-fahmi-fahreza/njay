@@ -1,10 +1,11 @@
-const express = require("express");
+const express = require('express')
 const path = require("path");
 const fs = require("fs").promises;
 const events = require("events");
 const { resolve } = require("path");
 const mongoose = require("mongoose");
 const { comics, bookShelves } = require("./schema");
+
 
 const app = express();
 const eventEmitter = new events.EventEmitter();
@@ -581,7 +582,7 @@ function authentication(req, res, next) {
 // ${purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
 // console.log(`Our available stock: ${book.stock}`)
 // if(book.stock > 0){
-//     console.log(`You can still buy ${book.stock} of our book`)
+pr//     console.log(`You can still buy ${book.stock} of our book`)
 // }else{
 //     console.log(`Im Sorry, but our book is out of stock`)
 // }
