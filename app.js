@@ -582,7 +582,7 @@ function authentication(req, res, next) {
 // ${purchasedBook} x RP ${book.finalPrice()} = RP ${amountPrice}`)
 // console.log(`Our available stock: ${book.stock}`)
 // if(book.stock > 0){
-pr//     console.log(`You can still buy ${book.stock} of our book`)
+//   console.log(`You can still buy ${book.stock} of our book`)
 // }else{
 //     console.log(`Im Sorry, but our book is out of stock`)
 // }
