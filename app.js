@@ -1,6 +1,5 @@
 const express = require("express");
-const path = require("path");
-const fs = require("fs").promises;
+
 const events = require("events");
 const { resolve } = require("path");
 const mongoose = require("mongoose");
