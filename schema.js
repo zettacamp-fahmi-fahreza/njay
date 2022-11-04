@@ -9,6 +9,7 @@ const bookSchema = new mongoose.Schema({
     date_added: Date,
     date_updated: Date,
     updated: Number,
+    stock: Number,
 });
 
 const objDate = new Date();
