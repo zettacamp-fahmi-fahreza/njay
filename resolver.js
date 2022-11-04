@@ -1,6 +1,11 @@
-const { ApolloError } = require('apollo-server-express');
+const { ApolloError ,gql} = require('apollo-server-express');
 const mongoose = require('mongoose');
 const { comics, bookShelves } = require("./schema");
+const DataLoader = require('dataloader');
+// const {keyBy} = require('lodash.keyby');
+
+const {bookLoader} = require('./loader.js');
+
 
 async function buyBook(parent,args){
     const book = await comics.findById(args.id)
@@ -111,7 +116,58 @@ result = result.map((el) => {
         books: result
         };
 }
+// async function getAllBookShelve(parent,args){
+//     const loaderBook = new DataLoader((keys)=> {
+//         console.log("tes")
+//         const result = keys.map((el) => {
+//             return comics.find({
+//                 _id: {
+//                     $in: el._id
+//                 }
+//             })
+//             return Promise.resolve(result)
+//         })
+//         console.log(result)
+//         // return loaderBook.load(parent.books)
+//         return Promise.resolve(result)
+//     })
+//     }
 
+ const getBookShelf = async function (){
+    const getBookShelf = await bookShelves.find()
+    
+    return getBookShelf
+}
+
+// const bookLoader = new DataLoader(getBookShelf)
+
+// const getAllBookShelves =async()=>{
+//     await bookShelves.find()
+//     return { loaderBook}
+// }
+
+// async function batchBook(bookIds){
+//     const books = await comics.find({
+//         _id: {
+//             $in : bookIds
+//         }
+//     })
+//     const bookByIds = keyBy(books, '_id')
+//     return bookIds.map(bookIds => bookByIds[bookIds])
+// }
+// const bookLoader = () => {
+//     return new DataLoader(bookIds => batchBook(bookIds))
+// }
+
+ async function book_id(parent,args,context){
+    // console.log("zzz")
+    if(parent.book_id){
+        // console.log(parent)
+console.log(context)
+        return await context.bookLoader.load(parent.book_id)
+        
+    }
+}
 
 const resolvers = {
     Mutation:{
@@ -137,14 +193,19 @@ const resolvers = {
                     return books
                 }
         }else{
-          const books= await comics.find({})
+          const books= await comics.find()
             return books
         }
         
       },
       getPagination,
+    //   bookLoader,    
+      getBookShelf
+   
     },
-    
+    booksForBookShelves: {
+        book_id
+    }
     
   };
   module.exports = {resolvers}

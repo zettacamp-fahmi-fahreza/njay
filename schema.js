@@ -20,7 +20,6 @@ const bookShelvesSchema = new mongoose.Schema(
         name: String,
         books: [
             {
-                _id: false,
                 book_id: {
                     type: mongoose.Schema.Types.ObjectId,
                     default: "",
