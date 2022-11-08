@@ -48,8 +48,6 @@ async function getAllUsers(parent,args, context){
     verifyJwt(context)
     let count = await users.count();
     let aggregateQuery = []
-    // THERES PROBLEM HERE!
-    // AGGREGATE HAS EMPTY PIPELINE
     if(args.length==0){
         aggregateQuery.push({
             $project: {id:1,first_name:1}
@@ -84,7 +82,17 @@ async function getAllUsers(parent,args, context){
         })
     }
     
-            
+            if(aggregateQuery.length === 0){
+                let result = await users.find()
+                result.forEach((el)=>{
+                    el.id = mongoose.Types.ObjectId(el.id)
+                })
+                return {
+                    count: count,
+                    // page: 0,
+                    users: result
+                    };
+            }
             let result = await users.aggregate(aggregateQuery);
                 result.forEach((el)=>{
                             el.id = mongoose.Types.ObjectId(el.id)
@@ -193,7 +201,17 @@ async function getAllIngredient(parent,args,context){
             message: 'Stock Cannot Be Zero!'
           });
     }
-    
+    if(aggregateQuery.length === 0){
+        let result = await ingredients.find()
+        result.forEach((el)=>{
+            el.id = mongoose.Types.ObjectId(el.id)
+        })
+        return {
+            count: count,
+            // page: 0,
+            data: result
+            };
+    }
     let result = await ingredients.aggregate(aggregateQuery);
                 result.forEach((el)=>{
                             el.id = mongoose.Types.ObjectId(el.id)
