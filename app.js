@@ -4,6 +4,10 @@ const {users} = require('./schema');
 const { ApolloServer,gql } = require('apollo-server');
 const{resolvers} = require('./resolver');
 const {typeDefs} = require('./typeDefs');
+const {makeExecutableSchema} = require('@graphql-tools/schema')
+const {applyMiddleware} = require('graphql-middleware');
+const authMiddleware = require('./auth')
+
 
 
 const app = express();
@@ -15,23 +19,25 @@ async function connectDB() {
 }
     connectDB()
 
-
-
-
-
+    const schema =  makeExecutableSchema({
+        typeDefs,
+        resolvers
+    })
+    const schemaMiddleware = applyMiddleware(
+        schema,authMiddleware
+    )
 const server = new ApolloServer({
-    typeDefs,
-    resolvers
-    // context: function ({req}) {
-    //   return {
-    //     //   songLoader,
-    //       req : req
-    //   };}
+    schema: schemaMiddleware,
+    context: function ({req}) {
+      return {
+        //   songLoader,
+          req : req
+      };}
   
   });
 
 
 
-  server.listen({ port: 3000 }, () =>
+  server.listen({ port: 4000 }, () =>
   console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
 );
