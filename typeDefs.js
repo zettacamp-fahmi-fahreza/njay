@@ -1,6 +1,6 @@
 const { ApolloServer,gql } = require('apollo-server');
 
-const {users,ingredients} = require('./schema');
+const {users,ingredients,recipes} = require('./schema');
 
 const typeDefs = gql`#graphql
 type User {
@@ -9,7 +9,7 @@ type User {
   email: String
   last_name: String
   first_name: String
-  status: String
+  status: Enum
 }
 type usersPage {
   count: Int
@@ -20,12 +20,21 @@ type Ingredient{
   id: ID
   name: String
   stock: Int
-  status: String
+  status: Enum
 }
 type ingredientsPage{
   count: Int
   page: Int
   data: [Ingredient]
+}
+type ingredientId{
+  ingredient_id: Ingredient
+  stock_used: Int
+}
+type Recipe {
+  recipe_name: String
+  ingredients:[ingredientId]
+  status: Enum
 }
 type respondDelUser {
   message: String
@@ -34,6 +43,10 @@ type respondDelUser {
 type respondDelIngredient {
   message: String
   data: Ingredient
+}
+enum Enum {
+  active
+  deleted
 }
 type login {
   message: String
@@ -57,6 +70,10 @@ type Mutation{
   addIngredient(name: String!,stock: Int!): Ingredient!
   updateIngredient(id: ID!,stock: Int) : Ingredient!
   deleteIngredient(id: ID!) : respondDelIngredient!
+  createRecipe(
+    recipe_name: String!
+  ingredients:[ID]!
+  ) : Recipe!
 }
 
 type Query {
@@ -64,6 +81,7 @@ getAllUsers(email:String,last_name: String,first_name:String,page: Int,limit: In
 getOneUser(email:String,id:ID): User!
 getOneIngredient(id:ID!): Ingredient!
 getAllIngredient(name: String,stock: Int): ingredientsPage
+getAllRecipes(recipe_name: String): [Recipe]
 }
 `
 

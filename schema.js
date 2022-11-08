@@ -30,8 +30,6 @@ const userSchema = new mongoose.Schema({
         default: 'active'
     }
 })
-const users = mongoose.model("Users", userSchema)
-
 const ingredientsSchema = new mongoose.Schema({
     name: {
         type: String,
@@ -50,12 +48,46 @@ const ingredientsSchema = new mongoose.Schema({
         default: 'active'
     }
 })
+const recipesSchema = new mongoose.Schema({
+    recipe_name:{
+        type: String,
+        required: true,
+        trim: true
+    } ,
+    ingredients: [
+        {
+            ingredient_id:{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Ingredients",
+                required: true,
+                trim: true,
+                unique: true,
 
+            },
+            stock_used: {
+                type: Number,
+                required: true,
+                trim: true,
+
+            }
+        }
+    ],
+    status: {
+        type: String,
+        enum: ["active", "deleted"],
+        default: 'active'
+    }
+
+})
+
+const users = mongoose.model("Users", userSchema)
 const ingredients = mongoose.model("Ingredients", ingredientsSchema)
+const recipes = mongoose.model("Recipes", recipesSchema)
 
 
 
 module.exports = {
     users,
-    ingredients
+    ingredients,
+    recipes
 }

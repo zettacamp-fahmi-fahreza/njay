@@ -1,7 +1,7 @@
 const { ApolloServer,gql } = require('apollo-server');
 const mongoose = require('mongoose');
 const DataLoader = require('dataloader');
-const {users,ingredients} = require('./schema');
+const {users,ingredients,recipes} = require('./schema');
 const { ApolloError} = require('apollo-errors');
 const { constants } = require('picomatch');
 const jwt = require('jsonwebtoken');
@@ -245,12 +245,22 @@ async function deleteIngredient(parent,args,context) {
         message: 'Wrong ID!'
       });
 }
+async function getAllRecipes(parent,args,context,info) {
+    return "Tes"
+}
+async function createRecipe(parent,args,context,info){
+    const newRecipe = new recipes(args)
+    // newRecipe.save()
+    console.log(args.ingredients)
+    return newRecipe
+}
 const resolvers = {
     Query: {
         getAllUsers,
         getOneUser,
         getOneIngredient,
-        getAllIngredient
+        getAllIngredient,
+        getAllRecipes
     },
     Mutation: {
         addUser,
@@ -259,7 +269,8 @@ const resolvers = {
         getToken,
         addIngredient,
         updateIngredient,
-        deleteIngredient
+        deleteIngredient,
+        createRecipe
     }
 }
 module.exports = {resolvers}
