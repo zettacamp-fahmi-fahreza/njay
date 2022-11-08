@@ -8,6 +8,12 @@ const app = express();
 const eventEmitter = new events.EventEmitter();
 const mongoose = require('mongoose');
 const {songs,songPlaylist} = require('./schema');
+const { ApolloServer,gql } = require('apollo-server');
+const{resolvers} = require('./resolver');
+const {typeDefs} = require('./typeDefs');
+const DataLoader = require('dataloader');
+const songLoader = require('./loader.js');
+const { makeExecutableSchema } = require('@graphql-tools/schema')
 
 connectDB().catch((err) => console.log(err));
 async function connectDB() {
@@ -204,7 +210,7 @@ function groupSong(arrObj, playFor){
         res.send(authenticate)
         console.log(authenticate)
     })
-    app.use(authentication)
+    // app.use(authentication)
 
     app.get("/allSongs",express.urlencoded({ extended: true }), async function (req, res, next) {
         let {match,sort,skip,limit} = req.body;
@@ -437,61 +443,61 @@ app.get('/', function(req, res, next) {
 
 
 // FUNGSI AUTENTIKASI
-function authentication(req, res, next) {
-    let authenticate = req.headers.authorization;
-    let err = new Error()
-    if (!authenticate) {
-        err.message = "Empty Token"
-            res.send({
-                err : err.message
-            })
-    }else{
-        authenticate = authenticate.split(' ')[1]
-        jwt.verify(authenticate, 'secret',(err,token)=>{
-            if (err) {
-                err.message = "Wrong Token"
-                res.send({
-                    err : err.message
-                })
-            }else{
-                next()
-            }
-        });
-    }
+// function authentication(req, res, next) {
+//     let authenticate = req.headers.authorization;
+//     let err = new Error()
+//     if (!authenticate) {
+//         err.message = "Empty Token"
+//             res.send({
+//                 err : err.message
+//             })
+//     }else{
+//         authenticate = authenticate.split(' ')[1]
+//         jwt.verify(authenticate, 'secret',(err,token)=>{
+//             if (err) {
+//                 err.message = "Wrong Token"
+//                 res.send({
+//                     err : err.message
+//                 })
+//             }else{
+//                 next()
+//             }
+//         });
+//     }
 
 
 
-express.urlencoded({extended:true}),function login(req, res, next) {
-    let {user,password} = req.body
-    let err = new Error()
-    if (user == users.user && password == users.password) {
-        next()
-    }else{
-        err.message = "Wrong"
-            res.send({
-                err : err.message
-            })
-        };
-    }
+// express.urlencoded({extended:true}),function login(req, res, next) {
+//     let {user,password} = req.body
+//     let err = new Error()
+//     if (user == users.user && password == users.password) {
+//         next()
+//     }else{
+//         err.message = "Wrong"
+//             res.send({
+//                 err : err.message
+//             })
+//         };
+//     }
 
-}
-    // console.log(decoded)
-    // console.log(decoded.foo) 
-    // if (decoded.data === "zetta") {
-    //     next()
-    // }else{
-    //     err = new Error("Wrong Token!");
-    //     res.send({
-    //         err : err.message
-    //     })
-    // }
-// 
-     //SHOW ARTIST
-// app.get('/artist/:artist',function(req, res, next) {
-//     let {artist} = req.params
-//     artist = artist.toString()
-//     res.send(filterByArtist(songsPlaylist, artist));
-//     })
+// }
+//     // console.log(decoded)
+//     // console.log(decoded.foo) 
+//     // if (decoded.data === "zetta") {
+//     //     next()
+//     // }else{
+//     //     err = new Error("Wrong Token!");
+//     //     res.send({
+//     //         err : err.message
+//     //     })
+//     // }
+// // 
+//      //SHOW ARTIST
+// // app.get('/artist/:artist',function(req, res, next) {
+// //     let {artist} = req.params
+// //     artist = artist.toString()
+// //     res.send(filterByArtist(songsPlaylist, artist));
+// //     })
 
 
 app.get('/artist', express.urlencoded({extended:true}),function(req, res, next) {
@@ -557,4 +563,34 @@ app.get('/groupSong/:duration',function(req, res, next) {
 
 
 
-app.listen(4000);
+
+// app.listen(4000);
+
+
+const server = new ApolloServer({
+    typeDefs,
+    resolvers,
+    context: function ({req}) {
+      return {
+          songLoader,
+          req : req
+      };}
+    // context: () => ({
+    //   loaders: loaders(),
+    // }),
+  
+  });
+
+//   server.start().then(res => {
+//     server.applyMiddleware({
+//         app
+//     });
+//     // run port 
+//     app.listen(port, () => {
+//         console.log(`App running in port ${port}`);
+//     });
+// });
+
+server.listen({ port: 4000 }, () =>
+  console.log(`🚀 Server ready at http://localhost:4000${server.graphqlPath}`)
+);

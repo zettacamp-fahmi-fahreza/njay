@@ -33,6 +33,8 @@ const songPlaylistSchema = new mongoose.Schema({
             ref:"Songs"
         }
     ],
+    totalDuration: Number,
+
     strict:false
 })
 const songPlaylist = mongoose.model("songPlaylist", songPlaylistSchema);
