@@ -1,13 +1,15 @@
 const { ApolloServer,gql } = require('apollo-server');
 const mongoose = require('mongoose');
-const DataLoader = require('dataloader');
 const {users,ingredients,recipes} = require('./schema');
 const { ApolloError} = require('apollo-errors');
 const { constants } = require('picomatch');
 const jwt = require('jsonwebtoken');
 const { message } = require('statuses');
 const bcrypt = require('bcrypt');
-
+const {merge} = require('lodash')
+const DataLoader = require('dataloader');
+const ingredientLoader = require('./loader.js');
+const { ifError } = require('assert');
 // async function getHash (){
 //     const pengguna = await users.find({});
 //     pengguna.forEach(async (user)=>{
@@ -184,7 +186,7 @@ async function getAllIngredient(parent,args,context){
     }
     if(args.name){
         aggregateQuery.push({
-            $match: {name: args.name}
+            $match: {name: new RegExp(args.name, "i")}
         },{
             $sort: {name: 1}
         })
@@ -264,31 +266,121 @@ async function deleteIngredient(parent,args,context) {
       });
 }
 async function getAllRecipes(parent,args,context,info) {
-    return "Tes"
+    let count = await recipes.count();
+    let aggregateQuery = []
+    if (args.page){
+        aggregateQuery.push({
+            $skip: (args.page - 1)*args.limit
+        },
+        {$limit: args.limit})
+    }
+    if(args.recipe_name){
+        aggregateQuery.push({
+            $match: {recipe_name: new RegExp(args.recipe_name, "i")}
+        },{
+            $sort: {recipe_name: 1}
+        })
+    }
+    if(aggregateQuery.length === 0){
+        let result = await recipes.find()
+        result.forEach((el)=>{
+            el.id = mongoose.Types.ObjectId(el.id)
+        })
+        return {
+            count: count,
+            // page: 0,
+            data: result
+            };
+    }
+    let result = await recipes.aggregate(aggregateQuery);
+                result.forEach((el)=>{
+                            el.id = mongoose.Types.ObjectId(el.id)
+                        })
+                        console.log(result);
+                return {
+                count: count,
+                page: args.page,
+                data: result
+                };
+    const getAll = await recipes.find()
+    return getAll
 }
 async function createRecipe(parent,args,context,info){
-    const newRecipe = new recipes(args)
-    // newRecipe.save()
-    console.log(args.ingredients)
+    const recipe= {}
+    recipe.recipe_name = args.recipe_name
+    recipe.ingredients = []
+    args.input.forEach((ingredient) => {
+        recipe.ingredients.push(ingredient)
+    })
+    // const new recipes(recipe).save;
+    // const newRecipe = new recipes(recipe)
+
+
+    // console.log(newRecipe)
+    // newRecipe.id = mongoose.Types.ObjectId(newRecipe._id)
+    const newRecipe = await recipes.create(recipe)
+    console.log(newRecipe);
     return newRecipe
 }
-const resolvers = {
+async function getOneRecipe(parent,args,context){
+    const getOne = await recipes.findById(args.id)
+    if(!getOne){
+        return new ApolloError("FooError",{
+            message: "Wrong ID!"
+        })
+    }
+    return getOne
+}
+async function getIngredientLoader(parent, args, context){
+
+    if (parent.ingredient_id){
+        let check = await context.ingredientLoader.load(parent.ingredient_id)
+        return check
+    }
+}
+const resolverUser  = {
     Query: {
         getAllUsers,
         getOneUser,
-        getOneIngredient,
-        getAllIngredient,
-        getAllRecipes
     },
     Mutation: {
         addUser,
         updateUser,
         deleteUser,
         getToken,
+    }
+}
+const resolverIngredient = {
+    Query: {
+        getOneIngredient,
+        getAllIngredient,
+    },
+    Mutation: {
         addIngredient,
         updateIngredient,
         deleteIngredient,
-        createRecipe
     }
 }
+const resolverRecipe = {
+    Query: {
+        
+        getOneRecipe,
+        getAllRecipes
+    },
+    Mutation: {
+        
+       
+        createRecipe
+    },
+    ingredientId: {
+        ingredient_id: getIngredientLoader
+    }
+
+}
+const resolvers = merge(
+   resolverUser,
+   resolverIngredient,
+   resolverRecipe
+)
+ 
 module.exports = {resolvers}

@@ -7,6 +7,9 @@ const {typeDefs} = require('./typeDefs');
 const {makeExecutableSchema} = require('@graphql-tools/schema')
 const {applyMiddleware} = require('graphql-middleware');
 const authMiddleware = require('./auth')
+const DataLoader = require('dataloader');
+const ingredientLoader = require('./loader.js');
+
 
 
 
@@ -30,8 +33,8 @@ const server = new ApolloServer({
     schema: schemaMiddleware,
     context: function ({req}) {
       return {
-        //   songLoader,
-          req : req
+          ingredientLoader,
+          req 
       };}
   
   });

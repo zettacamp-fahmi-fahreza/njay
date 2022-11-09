@@ -1,7 +1,6 @@
 const { ApolloServer,gql } = require('apollo-server');
 
 const {users,ingredients,recipes} = require('./schema');
-
 const typeDefs = gql`#graphql
 type User {
   id: ID
@@ -31,7 +30,17 @@ type ingredientId{
   ingredient_id: Ingredient
   stock_used: Int
 }
+input ingredientInput{
+  ingredient_id: ID
+  stock_used: Int
+}
+type recipePage{
+  count: Int
+  page: Int
+  data: [Recipe]
+}
 type Recipe {
+  id: ID
   recipe_name: String
   ingredients:[ingredientId]
   status: Enum
@@ -71,8 +80,7 @@ type Mutation{
   updateIngredient(id: ID!,stock: Int) : Ingredient!
   deleteIngredient(id: ID!) : respondDelIngredient!
   createRecipe(
-    recipe_name: String!
-  ingredients:[ID]!
+    recipe_name: String!,input:[ingredientInput]
   ) : Recipe!
 }
 
@@ -81,7 +89,8 @@ getAllUsers(email:String,last_name: String,first_name:String,page: Int,limit: In
 getOneUser(email:String,id:ID): User!
 getOneIngredient(id:ID!): Ingredient!
 getAllIngredient(name: String,stock: Int): ingredientsPage
-getAllRecipes(recipe_name: String): [Recipe]
+getAllRecipes(recipe_name: String,page: Int,limit: Int): recipePage!
+getOneRecipe(id:ID!): Recipe
 }
 `
 

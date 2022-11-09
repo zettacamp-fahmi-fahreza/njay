@@ -56,18 +56,19 @@ const recipesSchema = new mongoose.Schema({
     } ,
     ingredients: [
         {
+            // _id:false,
             ingredient_id:{
                 type: mongoose.Schema.Types.ObjectId,
                 ref: "Ingredients",
                 required: true,
-                trim: true,
-                unique: true,
+                unique: false
+                // trim: true,
 
             },
             stock_used: {
                 type: Number,
                 required: true,
-                trim: true,
+                // trim: true,
 
             }
         }
