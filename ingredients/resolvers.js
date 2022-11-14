@@ -3,8 +3,15 @@ const {ingredients} = require('../schema');
 const { ApolloError} = require('apollo-errors');
 
 async function getAllIngredient(parent,args,context){
+    const tick = Date.now()
     let count = await ingredients.count();
-    let aggregateQuery = []
+    let aggregateQuery = [
+        
+            {$match: {
+                status: 'active'
+            }}
+        
+    ]
     if (args.page){
         aggregateQuery.push({
             $skip: (args.page - 1)*args.limit
@@ -35,6 +42,7 @@ async function getAllIngredient(parent,args,context){
         result.forEach((el)=>{
             el.id = mongoose.Types.ObjectId(el.id)
         })
+        // console.log(`total time: ${Date.now()- tick} ms`)
         return {
             count: count,
             // page: 0,
@@ -45,17 +53,18 @@ async function getAllIngredient(parent,args,context){
                 result.forEach((el)=>{
                             el.id = mongoose.Types.ObjectId(el.id)
                         })
-                        console.log(result);
+                        console.log(`total time: ${Date.now()- tick} ms`)
                 return {
                 count: count,
                 page: args.page,
                 data: result
                 };
 }
+
+// ERRORR ADD REGEX HERE TO AVOID DUPICATION
 async function addIngredient(parent,args,context){
     const newIngredient = new ingredients(args)
     await newIngredient.save()
-    // console.log(newIngredient)
     return newIngredient;
 }
 async function getOneIngredient(parent,args,context){
@@ -71,7 +80,6 @@ async function updateIngredient(parent,args,context){
     const updateIngredient = await ingredients.findByIdAndUpdate(args.id, args,{
         new: true
     })
-    // console.log(updateIngredient.id)
     if(updateIngredient){
         return updateIngredient
     }
@@ -81,16 +89,17 @@ async function updateIngredient(parent,args,context){
 }
 async function deleteIngredient(parent,args,context) {
     const deleteIngredient = await ingredients.findByIdAndUpdate(args.id,{
-        status: 'deleted'
+        status: 'deleted',
+        stock: 0
     }, {
         new : true
     })
     if(deleteIngredient){
         return {deleteIngredient, message: 'Ingredient Has been deleted!', data: deleteIngredient}
     }
-    // throw new ApolloError('FooError', {
-    //     message: 'Wrong ID!'
-    //   });
+    throw new ApolloError('FooError', {
+        message: 'Wrong ID!'
+      });
 }
 
 

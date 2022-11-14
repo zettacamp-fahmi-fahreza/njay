@@ -8,38 +8,23 @@ const bcrypt = require('bcrypt');
 async function addUser(parent,args, context, info){
     args.password = await bcrypt.hash(args.password, 5)
     const newUser = new users(args)
-    // await newUser.save()
-    console.log(newUser)
+    await newUser.save()
     return newUser;
 }
 
-function verifyJwt(context){
-    const token = context.req.headers.authorization || ''
-    if(!token){
-        throw new ApolloError('FooError', {
-            message: 'Not Authorized!'
-          });
-    }
-    jwt.verify(token, 'zetta',(err,decoded)=>{
-        if(err){
-            throw new ApolloError(err)
-        }
-        console.log(decoded);
-    })
-}
+
 
 
 async function getAllUsers(parent,args, context){
     // const getAll = await users.find()
     // return getAll
-    verifyJwt(context)
+    // verifyJwt(context)
     let count = await users.count();
-    let aggregateQuery = []
-    if(args.length==0){
-        aggregateQuery.push({
-            $project: {id:1,first_name:1}
-        })
-    }
+    let aggregateQuery = [
+        {$match: {
+            status: 'active'
+        }}
+    ]
     if (args.page){
         aggregateQuery.push({
             $skip: (args.page - 1)*args.limit
@@ -84,7 +69,6 @@ async function getAllUsers(parent,args, context){
                 result.forEach((el)=>{
                             el.id = mongoose.Types.ObjectId(el.id)
                         })
-                        // console.log(result);
                 return {
                 count: count,
                 page: args.page,
@@ -109,7 +93,6 @@ async function getOneUser(parent,args, context){
 }
 async function updateUser(parent, args,contect){
     
-    // console.log(updateUser.password)
     
       if(!args.password){
         throw new ApolloError('FooError', {
@@ -143,19 +126,22 @@ async function deleteUser(parent, args,context){
 }
 async function getToken(parent, args,context){
     // const email = await u
-
     const userCheck = await users.findOne({email: args.email})
     if(!userCheck){
         return new ApolloError('FooError', {
             message: 'Email Not Found !'
           });
     }
+    if(userCheck.status === 'deleted'){
+        throw new ApolloError('FooError', 
+        {message: "Can't Login, User Status: Deleted!"})
+    }
     const getPassword = await bcrypt.compare(args.password, userCheck.password )
     if(!getPassword){
         throw new ApolloError('FooError', 
         {message: "Wrong password!"})
     }
-    const token = jwt.sign({ email: args.email, id: args.id},'zetta',{expiresIn:'1h'});
+    const token = jwt.sign({ email: args.email, id: userCheck.id},'zetta',{expiresIn:'10h'});
     return{message: token}
 }
 

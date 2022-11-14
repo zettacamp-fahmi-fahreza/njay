@@ -1,13 +1,19 @@
 
 const mongoose = require('mongoose');
-const {recipes} = require('../schema');
+const {recipes,ingredients} = require('../schema');
 const { ApolloError} = require('apollo-errors');
 
 
 
 async function getAllRecipes(parent,args,context,info) {
     let count = await recipes.count();
-    let aggregateQuery = []
+    let aggregateQuery = [
+        
+            {$match: {
+                status: 'active'
+            }}
+        
+    ]
     if (args.page){
         aggregateQuery.push({
             $skip: (args.page - 1)*args.limit
@@ -36,30 +42,34 @@ async function getAllRecipes(parent,args,context,info) {
                 result.forEach((el)=>{
                             el.id = mongoose.Types.ObjectId(el.id)
                         })
-                        console.log(result);
                 return {
                 count: count,
                 page: args.page,
                 data: result
                 };
-    const getAll = await recipes.find()
-    return getAll
 }
+
+//ERRORR WANNA DEVELOP A FUNCTION WHERE INGREDIENT NOT FOUND BUT FAILED
 async function createRecipe(parent,args,context,info){
+    if(args.input.length == 0){
+        throw new ApolloError('FooError', {
+            message: "Ingredient cannot be empty!"
+        })
+    }
     const recipe= {}
     recipe.recipe_name = args.recipe_name
-    recipe.ingredients = []
-    args.input.forEach((ingredient) => {
-        recipe.ingredients.push(ingredient)
+    recipe.ingredients = args.input
+    let checkIngredient = await ingredients.find()
+    checkIngredient = checkIngredient.map((el) => el.id)
+    let ingredientMap = args.input.map((el) => el.ingredient_id)
+    ingredientMap.forEach((el) => {
+        if(checkIngredient.indexOf(el) === -1){
+            throw new ApolloError("FooError",{
+                message: "Ingredient Not Found in Database!"
+            })
+        }
     })
-    // const new recipes(recipe).save;
-    // const newRecipe = new recipes(recipe)
-
-
-    // console.log(newRecipe)
-    // newRecipe.id = mongoose.Types.ObjectId(newRecipe._id)
     const newRecipe = await recipes.create(recipe)
-    console.log(newRecipe);
     return newRecipe
 }
 async function updateRecipe(parent,args,context){
@@ -67,7 +77,6 @@ async function updateRecipe(parent,args,context){
         new: true
     })
     if(recipe){
-        console.log(args.input);
         args.input.forEach((el) => {
             if(el.ingredient_id.length < 10)throw new ApolloError('FooError',{
                 message: 'Put Appropriate Ingredient_ID!'
@@ -87,7 +96,6 @@ async function deleteRecipe(parent,args,context){
         new : true
     })
     if(deleteRecipe){
-    console.log(deleteRecipe);
 
         return {deleteRecipe, message: 'Recipe Has been deleted!', data: deleteRecipe}
     }
@@ -95,7 +103,6 @@ async function deleteRecipe(parent,args,context){
         message: 'Wrong ID!'
       });
 }
-    // console.log(args.input.length);
 
 async function getOneRecipe(parent,args,context){
     const getOne = await recipes.findById(args.id)
@@ -106,14 +113,14 @@ async function getOneRecipe(parent,args,context){
     }
     return getOne
 }
-async function getIngredientLoader(parent, args, context){
 
+async function getIngredientLoader(parent, args, context){
+    // console.log(parent);
     if (parent.ingredient_id){
         let check = await context.ingredientLoader.load(parent.ingredient_id)
         return check
     }
 }
-
 
 
 const resolverRecipe = {
@@ -129,6 +136,6 @@ const resolverRecipe = {
     },
     ingredientId: {
         ingredient_id: getIngredientLoader
-    }
+    },
 }
 module.exports = resolverRecipe;

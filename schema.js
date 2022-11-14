@@ -1,6 +1,7 @@
 const { Enum } = require('@apollo/protobufjs')
 const express = require('express')
 const mongoose = require('mongoose')
+const moment = require('moment')
 
 const userSchema = new mongoose.Schema({
     password : {
@@ -52,7 +53,8 @@ const recipesSchema = new mongoose.Schema({
     recipe_name:{
         type: String,
         required: true,
-        trim: true
+        trim: true,
+        unique: true
     } ,
     ingredients: [
         {
@@ -93,22 +95,23 @@ const transactionsSchema = new mongoose.Schema({
                 required: true,
             },
             note: {
-                type: String,
-                required: true
+                type: String
             }
         }
     ],
     order_status: {
         type: String,
-        enum: ["success", "failed"]
+        enum: ["success", "failed"],
+        default: "failed"
     },
     order_date: {
-        type : Date,
-        default : new Date()
+        type : String,
+        default : moment(new Date()).locale("id-ID").format("LL")
     },
     status: {
         type: String,
-        enum: ['active', 'deleted']
+        enum: ['active', 'deleted'],
+        default: 'active'
     }
 })
 
@@ -123,5 +126,5 @@ module.exports = {
     users,
     ingredients,
     recipes,
-    transactionsSchema
+    transactions
 }

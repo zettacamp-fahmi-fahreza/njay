@@ -24,7 +24,7 @@ type Mutation{
     }
 type Query {
     getOneIngredient(id:ID!): Ingredient!
-    getAllIngredient(name: String,stock: Int): ingredientsPage
+    getAllIngredient(name: String,stock: Int,page:Int, limit: Int): ingredientsPage
     }`
 
 module.exports = {ingredientTypeDefs}

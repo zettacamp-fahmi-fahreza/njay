@@ -103,6 +103,7 @@
     "mime-db": "^1.52.0",
     "mime-types": "^2.1.35",
     "minimatch": "^3.1.2",
+    "moment": "^2.29.4",
     "mongodb": "^4.9.1",
     "mongodb-connection-string-url": "^2.5.4",
     "mongoose": "^6.6.5",

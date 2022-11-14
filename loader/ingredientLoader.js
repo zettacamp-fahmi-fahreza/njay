@@ -1,5 +1,6 @@
 const DataLoader = require('dataloader');
-const {users,ingredients,recipes} = require('./schema');
+const { log } = require('loglevel');
+const {users,ingredients,recipes,transactions} = require('../schema');
 
 const loadIngredient = async function(checkId){
     let ingredientList = await ingredients.find({
@@ -9,10 +10,12 @@ const loadIngredient = async function(checkId){
     })
     let ingredientMap = {}
 
-
     ingredientList.forEach((ingredient)=> ingredientMap[ingredient._id] = ingredient)
     return checkId.map(id => ingredientMap[id])
 }
+
+
+
 
 const ingredientLoader = new DataLoader(loadIngredient)
 module.exports = ingredientLoader;

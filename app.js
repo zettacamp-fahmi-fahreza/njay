@@ -9,15 +9,17 @@ const {applyMiddleware} = require('graphql-middleware');
 const authMiddleware = require('./auth')
 const DataLoader = require('dataloader');
 const {merge} = require('lodash')
-const ingredientLoader = require('./loader.js');
+const ingredientLoader = require('./loader/ingredientLoader.js');
+const userLoader = require ('./loader/userLoader')
+const recipeLoader = require ('./loader/recipeLoader')
 const resolverUser = require('./users/resolvers')
 const resolverIngredient = require('./ingredients/resolvers')
 const resolverRecipe = require('./recipes/resolvers')
+const resolverTransaction = require('./transactions/resolvers')
 const {userTypeDefs} = require('./users/typeDefs')
 const {ingredientTypeDefs} = require('./ingredients/typeDefs')
 const {recipeTypeDefs} = require('./recipes/typeDefs')
-
-
+const {transactionTypeDefs} = require('./transactions/typeDefs')
 
 
 const app = express();
@@ -29,12 +31,14 @@ async function connectDB() {
 const typeDefs = [
     userTypeDefs,
     ingredientTypeDefs,
-    recipeTypeDefs
+    recipeTypeDefs,
+    transactionTypeDefs
 ]
 const resolvers = merge(
     resolverUser,
     resolverIngredient,
-    resolverRecipe
+    resolverRecipe,
+    resolverTransaction
 )
     const schema =  makeExecutableSchema({
         typeDefs,
@@ -47,8 +51,10 @@ const server = new ApolloServer({
     schema: schemaMiddleware,
     context: function ({req}) {
       return {
-          ingredientLoader,
-          req 
+        userLoader,
+        ingredientLoader,
+        recipeLoader,
+        req 
       };}
   
   });
