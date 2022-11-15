@@ -24,6 +24,7 @@ type Transaction {
         order_status: enumStatus
         order_date: String
         status: Enum
+        totalPrice: Int
     }
 type transactionPage{
     count: Int

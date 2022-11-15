@@ -4,10 +4,43 @@ const { ApolloError} = require('apollo-errors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 
+// const admin_permission = [
+//         "getAllUsers",
+//         "getOneUser",
+//         "addUser",
+//         "updateUser",
+//         "deleteUser",
+//         "getToken",
+//         "createTransaction",
+//         "deleteTransaction",
+//         "getOneTransaction",
+//         "getAllTransactions",
+//         "getOneRecipe",
+//         "getAllRecipes",
+//         "deleteRecipe",
+//         "updateRecipe",
+//         "createRecipe",
+//         "getOneIngredient",
+//         "getAllIngredient",
+//         "addIngredient",
+//         "updateIngredient",
+//         "deleteIngredient"
+// ]
+// const user_permission = 
+// [
+//     "getToken",
+//     "createTransaction"
+//   ]
 
 async function addUser(parent,args, context, info){
     args.password = await bcrypt.hash(args.password, 5)
+    
     const newUser = new users(args)
+    // if (args.role === 'user'){
+    //     newUser.user_permission = user_permission
+    // }else{
+    //     newUser.user_permission = admin_permission
+    // }
     await newUser.save()
     return newUser;
 }
@@ -141,11 +174,15 @@ async function getToken(parent, args,context){
         throw new ApolloError('FooError', 
         {message: "Wrong password!"})
     }
-    const token = jwt.sign({ email: args.email, id: userCheck.id},'zetta',{expiresIn:'10h'});
-    return{message: token}
+    const token = jwt.sign({ email: args.email,},'zetta',{expiresIn:'1h'});
+    return{message: token, user: { 
+        email: userCheck.email, 
+        fullName: userCheck.first_name + ' ' + userCheck.last_name, 
+        first_name: userCheck.first_name, 
+        last_name: userCheck.last_name,
+        userType: userCheck.userType
+    }}
 }
-
-
 
 
 

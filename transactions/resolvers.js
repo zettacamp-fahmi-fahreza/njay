@@ -143,22 +143,27 @@ async function validateStockIngredient(user_id, menus){
             path : "ingredients.ingredient_id"
         }
     })
+    // console.log(menuTransaction)
+    let totalPrice = 0
     const ingredientMap = []
     for ( let menu of menuTransaction.menu){
-        // console.log(menu.recipe_id.ingredients);
         const amount = menu.amount
+        // console.log(menu);
+        totalPrice = menu.recipe_id.price * amount
         for( let ingredient of menu.recipe_id.ingredients){
             // console.log(ingredient);
                 ingredientMap.push({id: ingredient.ingredient_id,
-                    stock:ingredient.ingredient_id.stock - (ingredient.stock_used * amount) })
+                    stock:ingredient.ingredient_id.stock - (ingredient.stock_used * amount)})
             if(ingredient.ingredient_id.stock < ingredient.stock_used * amount){
                 return new transactions({user_id: user_id, menu: menus})
             }
         }
     }
     // console.log(ingredientMap);
+    console.log(totalPrice);
+
     await reduceIngredientStock(ingredientMap)
-    return new transactions({user_id: user_id, menu: menus,order_status: "success"})
+    return new transactions({user_id: user_id, menu: menus,order_status: "success",totalPrice: totalPrice})
 }
 
 async function createTransaction(parent,args,context){
@@ -173,7 +178,7 @@ async function createTransaction(parent,args,context){
     transaction.menu = args.input
 
     const newTransaction = await validateStockIngredient(context.req.payload, args.input)
-    // await transactions.create(newTransaction)
+    await transactions.create(newTransaction)
     // console.log(newTransaction)
     // reduceIngredientStock(newTransaction)
     console.log(`Total Time: ${Date.now()- tick} ms`)

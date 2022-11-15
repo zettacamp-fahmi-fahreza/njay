@@ -25,10 +25,32 @@ const userSchema = new mongoose.Schema({
         required: true,
         trim:true
     },
+    userType:{
+        userType_permission:[
+            {name:{
+                type: String,
+                trim:true,
+                required: true
+            },
+        view:{
+            type: Boolean,
+            trim:true,
+            required: true
+        }
+        }
+        ]
+        
+    }
+    ,
+    
     status: {
         type: String,
         enum: ['active','deleted'],
         default: 'active'
+    },
+    role: {
+        type: String,
+        enum: ['user','admin'],
     }
 })
 const ingredientsSchema = new mongoose.Schema({
@@ -70,11 +92,30 @@ const recipesSchema = new mongoose.Schema({
             }
         }
     ],
+    price : {
+        type: Number,
+        required: true,
+        trim: true
+    },
     status: {
         type: String,
         enum: ["active", "deleted"],
         default: 'active'
+    },
+    category: {
+        type: String,
+        enum: ["food", "drink"]
+    },
+    img: {
+        type: String,
+        required: true
+    },
+    description: {
+        type: String,
+        // trim: true,
+        required: true
     }
+    
 })
 
 const transactionsSchema = new mongoose.Schema({
@@ -112,6 +153,12 @@ const transactionsSchema = new mongoose.Schema({
         type: String,
         enum: ['active', 'deleted'],
         default: 'active'
+    },
+    totalPrice: {
+        type: Number,
+        required: true,
+        min: 0
+
     }
 })
 

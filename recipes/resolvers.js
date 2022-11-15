@@ -113,6 +113,17 @@ async function getOneRecipe(parent,args,context){
     }
     return getOne
 }
+async function getAvailable(parent, args, context, info) {
+    const minStock = []
+    // console.log(parent)
+    for (let ingredient of parent.ingredients) {
+        const recipe_ingredient = await ingredients.findById(ingredient.ingredient_id);
+        if (!recipe_ingredient) throw new ApolloError(`Ingredient with ID: ${ingredient.ingredient_id} not found`, "404");
+        minStock.push(Math.floor(recipe_ingredient.stock / ingredient.stock_used));
+    }
+    return Math.min(...minStock);
+}
+
 
 async function getIngredientLoader(parent, args, context){
     // console.log(parent);
@@ -137,5 +148,8 @@ const resolverRecipe = {
     ingredientId: {
         ingredient_id: getIngredientLoader
     },
+    Recipe: {
+        available: getAvailable
+    }
 }
 module.exports = resolverRecipe;

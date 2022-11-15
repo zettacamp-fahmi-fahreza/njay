@@ -9,6 +9,15 @@ type User {
     last_name: String
     first_name: String
     status: Enum
+    userType: userType
+    role: Role
+    }
+    type userType {
+        userType_permission: [userType_permit]
+    }
+    type userType_permit{
+        name: String
+        view: Boolean
     }
 type usersPage {
     count: Int
@@ -19,12 +28,25 @@ type respondDelUser {
     message: String
     data: User
     }
+    enum Role{
+        admin
+        user
+    }
 enum Enum {
     active
     deleted
     }
+type userLogin {
+    email: String
+    fullName: String
+    first_name: String
+    last_name: String
+    userType: userType
+    
+}
 type login {
     message: String
+    user: userLogin
     }
 type Mutation {
     addUser(
@@ -32,6 +54,7 @@ type Mutation {
     email: String!
     last_name: String!
     first_name: String!
+    role: Role!
     ) : User!
     updateUser(
         id: ID!

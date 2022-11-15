@@ -2,6 +2,7 @@
 const jwt = require('jsonwebtoken');
 
 const { ApolloError} = require('apollo-errors');
+const { users } = require('./schema');
 
 async function authMiddleware(resolve,parent,args,context,info) {
     const token = context.req.headers.authorization || ''
@@ -9,18 +10,14 @@ async function authMiddleware(resolve,parent,args,context,info) {
         throw new ApolloError('FooError', {
             message: 'Not Authorized!'
     })}
-    // const decode = context.req.payload.authorization.id
-    jwt.verify(token,'zetta',(err,decoded)=>{
-        if(err){
-            throw new ApolloError(err)
-        }
-        // console.log(decoded)
 
-
-        context.req.payload = decoded.id
-        // console.log(context.req.payload)
+    const decoded = jwt.verify(token,'zetta')
+    const user = await users.findOne({
+        email: decoded.email
     })
-    // console.log(decode)
+    console.log(user)
+
+ context.req.payload = user.id
     return resolve(parent,args,context,info)
 }
 
@@ -31,7 +28,7 @@ module.exports = {
         getOneIngredient: authMiddleware,
         getAllIngredient: authMiddleware,
         getOneRecipe: authMiddleware,
-        getAllRecipes: authMiddleware,
+        // getAllRecipes: authMiddleware,
         getOneTransaction: authMiddleware,
         getAllTransactions: authMiddleware,
     },
