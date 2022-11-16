@@ -3,6 +3,7 @@ const {users} = require('../schema');
 const { ApolloError} = require('apollo-errors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const validateStockIngredient = require('../transactions/resolvers');
 
 // const admin_permission = [
 //         "getAllUsers",
@@ -72,6 +73,18 @@ async function getAllUsers(parent,args, context){
             $sort: {email: 1}
         })
     }
+    if(args.sort){
+        if(args.sort === "asc"){
+            aggregateQuery.push({
+                $sort: {first_name: 1}
+            })
+        }else{
+            aggregateQuery.push({
+                $sort: {first_name: -1}
+            })
+        }
+        
+    }
     if(args.last_name){
         aggregateQuery.push({
             $match: {last_name: new RegExp(args.last_name, "i") }
@@ -87,20 +100,20 @@ async function getAllUsers(parent,args, context){
         })
     }
     
-            if(aggregateQuery.length === 0){
-                let result = await users.find()
-                result.forEach((el)=>{
-                    el.id = mongoose.Types.ObjectId(el.id)
-                })
-                return {
-                    count: count,
-                    // page: 0,
-                    users: result
-                    };
-            }
+            // if(aggregateQuery.length === 0){
+            //     let result = await users.find()
+            //     result.forEach((el)=>{
+            //         el.id = mongoose.Types.ObjectId(el.id)
+            //     })
+            //     return {
+            //         count: count,
+            //         // page: 0,
+            //         users: result
+            //         };
+            // }
             let result = await users.aggregate(aggregateQuery);
                 result.forEach((el)=>{
-                            el.id = mongoose.Types.ObjectId(el.id)
+                            el.id = mongoose.Types.ObjectId(el._id)
                         })
                 return {
                 count: count,
@@ -174,7 +187,7 @@ async function getToken(parent, args,context){
         throw new ApolloError('FooError', 
         {message: "Wrong password!"})
     }
-    const token = jwt.sign({ email: args.email,},'zetta',{expiresIn:'1h'});
+    const token = jwt.sign({ email: args.email,},'zetta',{expiresIn:'6h'});
     return{message: token, user: { 
         email: userCheck.email, 
         fullName: userCheck.first_name + ' ' + userCheck.last_name, 
@@ -183,6 +196,39 @@ async function getToken(parent, args,context){
         userType: userCheck.userType
     }}
 }
+
+// async function addCart(parent,args,context){
+//     const tick = Date.now()
+//     if(args.input.length == 0){
+//         throw new ApolloError('FooError', {
+//             message: "Input cannot be empty!"
+//         })
+//     }
+//     // const transaction = {}
+//     // transaction.user_id = context.req.payload
+//     // transaction.menu = args.input
+//     // const userActive = await users.findById(context.req.payload)
+//     // // const newTransaction = await validateStockIngredient(context.req.payload, args.input)
+//     // console.log(context.req.payload)
+//     // userActive.cart = args.input
+//     const newTransaction = await users.updateOne(
+//         {_id: context.req.payload},
+//         {$push: {cart: args.input}}
+//         )
+//     // findByIdAndUpdate(context.req.payload, {
+//     //     cart: args.input
+//     // },{
+//     //     new: true
+//     // })
+//     // console.log(newTransaction.cart)
+//     // await transactions.create(newTransaction)
+//     // reduceIngredientStock(newTransaction)
+//     console.log(`Total Time: ${Date.now()- tick} ms`)
+//     return {
+//         message: "Succesfully Added To Cart",
+//         // cart: newTransaction.cart
+//     }
+// }
 
 
 
@@ -196,6 +242,7 @@ const resolverUser  = {
         updateUser,
         deleteUser,
         getToken,
+        // addCart
     }
 }
 module.exports = resolverUser;

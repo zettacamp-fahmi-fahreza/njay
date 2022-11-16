@@ -70,32 +70,21 @@ async function getAllTransactions(parent,args,context,info) {
         }
         )
     }
-    if(aggregateQuery.length === 0){
-        let result = await transactions.find()
-        result.forEach((el)=>{
-            el.id = mongoose.Types.ObjectId(el.id)
-            // el.order_date = el.order_date.toLocaleString('default', {
-            //     year: 'numeric',
-            //     month: 'long',
-            //     day: '2-digit'
-            // })
-        })
-        return {
-            count: count,
-            // page: 0,
-            data: result
-            };
-    }
+    // if(aggregateQuery.length === 0){
+    //     let result = await transactions.find()
+    //     result.forEach((el)=>{
+    //         el.id = mongoose.Types.ObjectId(el.id)
+    //     })
+    //     return {
+    //         count: count,
+    //         // page: 0,
+    //         data: result
+    //         };
+    // }
     let result = await transactions.aggregate(aggregateQuery);
                 result.forEach((el)=>{
-                            el.id = mongoose.Types.ObjectId(el.id)
-                            // el.order_date = el.order_date.toLocaleString('default', {
-                            //     year: 'numeric',
-                            //     month: 'long',
-                            //     day: '2-digit'
-                            // })
+                            el.id = mongoose.Types.ObjectId(el._id)
                         })
-                        console.log(result)
                 return {
                 count: count,
                 page: args.page,
@@ -143,15 +132,12 @@ async function validateStockIngredient(user_id, menus){
             path : "ingredients.ingredient_id"
         }
     })
-    // console.log(menuTransaction)
     let totalPrice = 0
     const ingredientMap = []
     for ( let menu of menuTransaction.menu){
         const amount = menu.amount
-        // console.log(menu);
         totalPrice = menu.recipe_id.price * amount
         for( let ingredient of menu.recipe_id.ingredients){
-            // console.log(ingredient);
                 ingredientMap.push({id: ingredient.ingredient_id,
                     stock:ingredient.ingredient_id.stock - (ingredient.stock_used * amount)})
             if(ingredient.ingredient_id.stock < ingredient.stock_used * amount){
@@ -159,8 +145,6 @@ async function validateStockIngredient(user_id, menus){
             }
         }
     }
-    // console.log(ingredientMap);
-    console.log(totalPrice);
 
     await reduceIngredientStock(ingredientMap)
     return new transactions({user_id: user_id, menu: menus,order_status: "success",totalPrice: totalPrice})
@@ -179,11 +163,27 @@ async function createTransaction(parent,args,context){
 
     const newTransaction = await validateStockIngredient(context.req.payload, args.input)
     await transactions.create(newTransaction)
-    // console.log(newTransaction)
     // reduceIngredientStock(newTransaction)
     console.log(`Total Time: ${Date.now()- tick} ms`)
     return newTransaction
 }
+// async function addCart(parent,args,context){
+//     const tick = Date.now()
+//     if(args.input.length == 0){
+//         throw new ApolloError('FooError', {
+//             message: "Input cannot be empty!"
+//         })
+//     }
+//     const transaction = {}
+//     transaction.user_id = context.req.payload
+//     transaction.menu = args.input
+
+//     const newTransaction = await validateStockIngredient(context.req.payload, args.input)
+//     await transactions.create(newTransaction)
+//     // reduceIngredientStock(newTransaction)
+//     console.log(`Total Time: ${Date.now()- tick} ms`)
+//     return newTransaction
+// }
 async function deleteTransaction(parent,args,context){
     const deleteTransaction = await transactions.findByIdAndUpdate(args.id,{
         status: 'deleted'

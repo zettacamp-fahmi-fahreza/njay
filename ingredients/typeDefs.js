@@ -19,8 +19,8 @@ type respondDelIngredient {
     }
 type Mutation{
     addIngredient(name: String!,stock: Int!): Ingredient!
-    updateIngredient(id: ID!,stock: Int) : Ingredient!
-    deleteIngredient(id: ID!) : respondDelIngredient!
+    updateIngredient(id: ID!,stock: Int name: String) : Ingredient!
+    deleteIngredient(id: ID!) : respondDelIngredient
     }
 type Query {
     getOneIngredient(id:ID!): Ingredient!

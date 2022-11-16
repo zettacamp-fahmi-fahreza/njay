@@ -42,6 +42,7 @@ type Query {
 }
 type Mutation {
     createTransaction( input: [menuInput]) : Transaction
+    
     deleteTransaction(id:ID!) : Transaction!
 }
 `

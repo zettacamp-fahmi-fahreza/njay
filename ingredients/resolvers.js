@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const {ingredients} = require('../schema');
+const {ingredients, recipes} = require('../schema');
 const { ApolloError} = require('apollo-errors');
 
 async function getAllIngredient(parent,args,context){
@@ -7,9 +7,9 @@ async function getAllIngredient(parent,args,context){
     let count = await ingredients.count();
     let aggregateQuery = [
         
-            {$match: {
-                status: 'active'
-            }}
+            // {$match: {
+            //     status: 'active'
+            // }}
         
     ]
     if (args.page){
@@ -38,9 +38,11 @@ async function getAllIngredient(parent,args,context){
           });
     }
     if(aggregateQuery.length === 0){
-        let result = await ingredients.find()
+        let result = await ingredients.find({
+            // status: 'active'
+        })
         result.forEach((el)=>{
-            el.id = mongoose.Types.ObjectId(el.id)
+            el.id = mongoose.Types.ObjectId(el._id)
         })
         // console.log(`total time: ${Date.now()- tick} ms`)
         return {
@@ -51,7 +53,7 @@ async function getAllIngredient(parent,args,context){
     }
     let result = await ingredients.aggregate(aggregateQuery);
                 result.forEach((el)=>{
-                            el.id = mongoose.Types.ObjectId(el.id)
+                            el.id = mongoose.Types.ObjectId(el._id)
                         })
                         console.log(`total time: ${Date.now()- tick} ms`)
                 return {
@@ -72,9 +74,10 @@ async function getOneIngredient(parent,args,context){
     return getOneIngredient
 }
 async function updateIngredient(parent,args,context){
-    if(args.stock <= 0){
+    console.log(typeof(args.id))
+    if(args.stock < 0){
         throw new ApolloError('FooError', {
-            message: 'Stock Cannot be 0 or less!'
+            message: 'Stock Cannot be less than 0!'
           });
     }
     const updateIngredient = await ingredients.findByIdAndUpdate(args.id, args,{
@@ -87,7 +90,46 @@ async function updateIngredient(parent,args,context){
         message: 'Wrong ID!'
       });
 }
+// async function deleteIngredient(parent,args,context) {
+//     const allRecipes = await recipes.find()
+//     for(let recipe of allRecipes){
+//         for(let ingredient of recipe.ingredients){
+//             let ingredient_id = ingredient.ingredient_id.toString()
+//             if(ingredient_id === args.id){
+//                 throw new ApolloError('FooError', {
+//                     message: 'Cannot delete this ingredient!'
+//                   });
+//         }
+//     }
+//     }
+//     const deleteIngredient = await ingredients.findByIdAndUpdate(args.id,{
+//         status: 'deleted',
+//         stock: 0
+//     }, {
+//         new : true
+//     })
+//     if(deleteIngredient){
+//         return {deleteIngredient, message: 'Ingredient Has been deleted!', data: deleteIngredient}
+//     }
+//     throw new ApolloError('FooError', {
+//         message: 'Wrong ID!'
+//       });
+// 
+// }
+
+async function findIngredientInRecipe(id) {
+    const checkRecipe = await recipes.find({ ingredients: { $elemMatch: { ingredient_id: mongoose.Types.ObjectId(id) } } })
+    if (!checkRecipe.length) return true
+    return false;
+}
 async function deleteIngredient(parent,args,context) {
+    console.log(args.id)
+    const checkIngredient = await findIngredientInRecipe(args.id)
+    if (!checkIngredient){
+        throw new ApolloError('FooError', {
+            message: 'Ingredient is used in recipe, Cannot Delete!'
+          });
+    }
     const deleteIngredient = await ingredients.findByIdAndUpdate(args.id,{
         status: 'deleted',
         stock: 0

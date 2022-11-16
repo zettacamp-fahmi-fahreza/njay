@@ -27,20 +27,20 @@ async function getAllRecipes(parent,args,context,info) {
             $sort: {recipe_name: 1}
         })
     }
-    if(aggregateQuery.length === 0){
-        let result = await recipes.find()
-        result.forEach((el)=>{
-            el.id = mongoose.Types.ObjectId(el.id)
-        })
-        return {
-            count: count,
-            // page: 0,
-            data: result
-            };
-    }
+    // if(aggregateQuery.length === 0){
+    //     let result = await recipes.find()
+    //     result.forEach((el)=>{
+    //         el.id = mongoose.Types.ObjectId(el.id)
+    //     })
+    //     return {
+    //         count: count,
+    //         // page: 0,
+    //         data: result
+    //         };
+    // }
     let result = await recipes.aggregate(aggregateQuery);
                 result.forEach((el)=>{
-                            el.id = mongoose.Types.ObjectId(el.id)
+                            el.id = mongoose.Types.ObjectId(el._id)
                         })
                 return {
                 count: count,
@@ -115,7 +115,6 @@ async function getOneRecipe(parent,args,context){
 }
 async function getAvailable(parent, args, context, info) {
     const minStock = []
-    // console.log(parent)
     for (let ingredient of parent.ingredients) {
         const recipe_ingredient = await ingredients.findById(ingredient.ingredient_id);
         if (!recipe_ingredient) throw new ApolloError(`Ingredient with ID: ${ingredient.ingredient_id} not found`, "404");
@@ -126,7 +125,6 @@ async function getAvailable(parent, args, context, info) {
 
 
 async function getIngredientLoader(parent, args, context){
-    // console.log(parent);
     if (parent.ingredient_id){
         let check = await context.ingredientLoader.load(parent.ingredient_id)
         return check

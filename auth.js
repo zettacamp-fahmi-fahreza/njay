@@ -15,8 +15,7 @@ async function authMiddleware(resolve,parent,args,context,info) {
     const user = await users.findOne({
         email: decoded.email
     })
-    console.log(user)
-
+    // console.log(user)
  context.req.payload = user.id
     return resolve(parent,args,context,info)
 }
@@ -44,6 +43,7 @@ module.exports = {
         createRecipe: authMiddleware,
         createTransaction: authMiddleware,
         deleteTransaction: authMiddleware,
+        // addCart: authMiddleware,
     }
 }
 

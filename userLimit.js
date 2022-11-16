@@ -12,7 +12,6 @@ async function testMiddleware(resolve,parent,args,context,info) {
         throw new ApolloError('FooError',{
         message: "User Cannot Acces This Page"})
     }
-    console.log(user.role)
     return resolve(parent,args,context,info)
 }
 

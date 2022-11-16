@@ -51,7 +51,23 @@ const userSchema = new mongoose.Schema({
     role: {
         type: String,
         enum: ['user','admin'],
-    }
+    },
+    // cart: [
+    //     {
+    //         recipe_id:{
+    //             type: mongoose.Schema.Types.ObjectId,
+    //             ref: "Recipes",
+    //             required: true
+    //         },
+    //         amount: {
+    //             type: Number,
+    //             required: true,
+    //         },
+    //         note: {
+    //             type: String
+    //         }
+    //     }
+    // ]
 })
 const ingredientsSchema = new mongoose.Schema({
     name: {
@@ -63,7 +79,8 @@ const ingredientsSchema = new mongoose.Schema({
     stock: {
         type: Number,
         required: true,
-        trim: true
+        trim: true,
+        min: 0
     },
     status: {
         type: String,
@@ -89,18 +106,20 @@ const recipesSchema = new mongoose.Schema({
             stock_used: {
                 type: Number,
                 required: true,
+                min: 0
             }
         }
     ],
     price : {
         type: Number,
         required: true,
-        trim: true
+        trim: true,
+        min: 0
     },
     status: {
         type: String,
-        enum: ["active", "deleted"],
-        default: 'active'
+        enum: ["active", "deleted","unpublished"],
+        default: 'unpublished'
     },
     category: {
         type: String,
@@ -114,7 +133,12 @@ const recipesSchema = new mongoose.Schema({
         type: String,
         // trim: true,
         required: true
-    }
+    },
+    // publish_status: {
+    //     type: String,
+    //     enum: ['unpublished', 'published'],
+    //     default: 'unpublished'
+    // },
     
 })
 
@@ -134,6 +158,7 @@ const transactionsSchema = new mongoose.Schema({
             amount: {
                 type: Number,
                 required: true,
+                min: 0
             },
             note: {
                 type: String
@@ -162,6 +187,38 @@ const transactionsSchema = new mongoose.Schema({
     }
 })
 
+const cartSchema = new mongoose.Schema({
+    user_id:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Users",
+        required: true
+    },
+    menu: [
+        {
+            recipe_id:{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Recipes",
+                required: true
+            },
+            amount: {
+                type: Number,
+                required: true,
+                min: 0
+
+            },
+            note: {
+                type: String
+            }
+        }
+    ],
+    status: {
+        type: String,
+        enum: ['pending', 'success'],
+        default: 'pending'
+    },
+
+})
+const carts  = mongoose.model("Carts", cartSchema)
 const users = mongoose.model("Users", userSchema)
 const ingredients = mongoose.model("Ingredients", ingredientsSchema)
 const recipes = mongoose.model("Recipes", recipesSchema)
@@ -173,5 +230,6 @@ module.exports = {
     users,
     ingredients,
     recipes,
-    transactions
+    transactions,
+    carts
 }

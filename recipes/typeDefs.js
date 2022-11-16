@@ -20,16 +20,26 @@ const recipeTypeDefs = gql`
         food
         drink
     }
+    enum enumRecipe {
+    active
+    deleted
+    unpublished
+    }
+    enum Publish {
+        unpublished
+        published
+    }
     type Recipe {
     id: ID
     recipe_name: String
     ingredients:[ingredientId]
     price: Int
-    status: Enum
+    status: enumRecipe
     available: Int
     img: String
     description: String
     category: Category
+    # publish_status: Publish
     }
     type respondDelRecipe{
     message: String
@@ -41,7 +51,7 @@ type Query {
     getOneRecipe(id:ID!): Recipe
 }
 type Mutation {
-    createRecipe(recipe_name: String! category: Category! img: String decription: String price: Int! input:[ingredientInput]!) : Recipe!
+    createRecipe(recipe_name: String! category: Category img: String description: String price: Int! input:[ingredientInput]!) : Recipe!
     updateRecipe(id:ID! recipe_name: String img: String description: String price: Int input:[ingredientInput]): Recipe!
     deleteRecipe(id: ID!): respondDelRecipe!
 }`

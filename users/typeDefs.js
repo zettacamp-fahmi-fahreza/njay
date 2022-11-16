@@ -11,6 +11,7 @@ type User {
     status: Enum
     userType: userType
     role: Role
+    # cart: [Menu]
     }
     type userType {
         userType_permission: [userType_permit]
@@ -36,6 +37,10 @@ enum Enum {
     active
     deleted
     }
+# enum Sort {
+#     asc
+#     desc
+# }
 type userLogin {
     email: String
     fullName: String
@@ -43,6 +48,9 @@ type userLogin {
     last_name: String
     userType: userType
     
+}
+type respondAddCart {
+    message: String
 }
 type login {
     message: String
@@ -65,9 +73,11 @@ type Mutation {
     ): User!
     deleteUser(id: ID!): respondDelUser!
     getToken(email: String!, password:String!) : login!
+
+    # addCart( input: [menuInput]) : respondAddCart!
 }
 type Query {
-    getAllUsers(email:String,last_name: String,first_name:String,page: Int,limit: Int) : usersPage!
+    getAllUsers(email:String,last_name: String,first_name:String,page: Int,limit: Int sort: String) : usersPage!
     getOneUser(email:String,id:ID): User!
 }`
 
