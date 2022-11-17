@@ -34,6 +34,7 @@ type transactionPage{
 enum enumStatus {
         success
         failed
+        pending
     }
 
 type Query {

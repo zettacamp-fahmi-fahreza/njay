@@ -53,6 +53,7 @@ async function getAllUsers(parent,args, context){
     // const getAll = await users.find()
     // return getAll
     // verifyJwt(context)
+    console.log(args.input.email === 'asc',typeof args.input.email)
     let count = await users.count();
     let aggregateQuery = [
         {$match: {
@@ -69,35 +70,35 @@ async function getAllUsers(parent,args, context){
     if(args.email){
         aggregateQuery.push({
             $match: {email: args.email}
-        },{
-            $sort: {email: 1}
-        })
+        },
+        // {
+        //     $sort: {email: 1}
+        // }
+        )
     }
-    if(args.sort){
-        if(args.sort === "asc"){
-            aggregateQuery.push({
-                $sort: {first_name: 1}
-            })
-        }else{
-            aggregateQuery.push({
-                $sort: {first_name: -1}
-            })
-        }
-        
+    if(args.input){
+        args.input.email ? args.input.email === 'asc' ? aggregateQuery.push({$sort: {email:1}}) : aggregateQuery.push({$sort: {email:-1}}): null
+        args.input.first_name ? args.input.first_name === 'asc' ? aggregateQuery.push({$sort: {first_name:1}}) : aggregateQuery.push({$sort: {first_name:-1}}) : null
+        args.input.last_name ? args.input.last_name === 'asc' ? aggregateQuery.push({$sort: {last_name:1}}) : aggregateQuery.push({$sort: {last_name:-1}}) : null
     }
+    console.log(aggregateQuery)
     if(args.last_name){
         aggregateQuery.push({
             $match: {last_name: new RegExp(args.last_name, "i") }
-        },{
-            $sort: {last_name: 1}
-        })
+        },
+        // {
+        //     $sort: {last_name: 1}
+        // }
+        )
     }
     if(args.first_name){
         aggregateQuery.push({
             $match: {first_name:  new RegExp(args.first_name, "i") }
-        },{
-            $sort: {first_name: 1}
-        })
+        },
+        // {
+        //     $sort: {first_name: 1}
+        // }
+        )
     }
     
             // if(aggregateQuery.length === 0){
@@ -172,6 +173,9 @@ async function deleteUser(parent, args,context){
 }
 async function getToken(parent, args,context){
     // const email = await u
+        const tick = Date.now()
+
+
     const userCheck = await users.findOne({email: args.email})
     if(!userCheck){
         return new ApolloError('FooError', {
@@ -188,6 +192,7 @@ async function getToken(parent, args,context){
         {message: "Wrong password!"})
     }
     const token = jwt.sign({ email: args.email,},'zetta',{expiresIn:'6h'});
+        console.log(`Total Time for Login: ${Date.now()- tick} ms`)
     return{message: token, user: { 
         email: userCheck.email, 
         fullName: userCheck.first_name + ' ' + userCheck.last_name, 

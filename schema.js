@@ -86,6 +86,9 @@ const ingredientsSchema = new mongoose.Schema({
         type: String,
         enum: ["active", "deleted"],
         default: 'active'
+    },
+    is_used: {
+        type: Boolean
     }
 })
 const recipesSchema = new mongoose.Schema({
@@ -167,8 +170,8 @@ const transactionsSchema = new mongoose.Schema({
     ],
     order_status: {
         type: String,
-        enum: ["success", "failed"],
-        default: "failed"
+        enum: ["success","pending", "failed"],
+        default: "pending"
     },
     order_date: {
         type : String,
@@ -216,7 +219,11 @@ const cartSchema = new mongoose.Schema({
         enum: ['pending', 'success'],
         default: 'pending'
     },
-
+    totalPrice: {
+        type: Number,
+        required: true,
+        min: 0
+    }
 })
 const carts  = mongoose.model("Carts", cartSchema)
 const users = mongoose.model("Users", userSchema)

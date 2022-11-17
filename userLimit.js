@@ -22,7 +22,7 @@ module.exports = {
         getOneIngredient: testMiddleware,
         getAllIngredient: testMiddleware,
         getOneRecipe: testMiddleware,
-        // getAllRecipes: testMiddleware,
+        getAllRecipes: testMiddleware,
         getOneTransaction: testMiddleware,
         getAllTransactions: testMiddleware,
     },

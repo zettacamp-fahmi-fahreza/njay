@@ -12,6 +12,18 @@ type User {
     userType: userType
     role: Role
     # cart: [Menu]
+    sort: userSort
+    }
+    type userSort {
+        email: enumSorting
+        last_name: enumSorting
+        first_name: enumSorting
+    }
+
+    input userSorting {
+        email: enumSorting
+        last_name: enumSorting
+        first_name: enumSorting
     }
     type userType {
         userType_permission: [userType_permit]
@@ -37,10 +49,10 @@ enum Enum {
     active
     deleted
     }
-# enum Sort {
-#     asc
-#     desc
-# }
+enum enumSorting {
+    asc
+    desc
+}
 type userLogin {
     email: String
     fullName: String
@@ -77,7 +89,7 @@ type Mutation {
     # addCart( input: [menuInput]) : respondAddCart!
 }
 type Query {
-    getAllUsers(email:String,last_name: String,first_name:String,page: Int,limit: Int sort: String) : usersPage!
+    getAllUsers(email:String,last_name: String,first_name:String,page: Int,limit: Int input:userSorting ) : usersPage!
     getOneUser(email:String,id:ID): User!
 }`
 

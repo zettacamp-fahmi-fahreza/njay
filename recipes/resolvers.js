@@ -5,7 +5,7 @@ const { ApolloError} = require('apollo-errors');
 
 
 
-async function getAllRecipes(parent,args,context,info) {
+async function getActiveMenu(parent,args,context,info) {
     let count = await recipes.count();
     let aggregateQuery = [
         
@@ -14,23 +14,24 @@ async function getAllRecipes(parent,args,context,info) {
             }}
         
     ]
+    if(args.recipe_name){
+        aggregateQuery.push({
+            $match: {recipe_name: new RegExp(args.recipe_name, "i")}
+        })
+    }
     if (args.page){
         aggregateQuery.push({
             $skip: (args.page - 1)*args.limit
         },
         {$limit: args.limit})
     }
-    if(args.recipe_name){
-        aggregateQuery.push({
-            $match: {recipe_name: new RegExp(args.recipe_name, "i")}
-        },{
-            $sort: {recipe_name: 1}
-        })
+    if(args.input){
+        args.input.recipe_name === 'asc' ? aggregateQuery.push({$sort: {recipe_name:1}}) : aggregateQuery.push({$sort: {recipe_name:-1}})
     }
     // if(aggregateQuery.length === 0){
     //     let result = await recipes.find()
     //     result.forEach((el)=>{
-    //         el.id = mongoose.Types.ObjectId(el.id)
+    //         el.id = mongoose.Types.ObjectId(el._id)
     //     })
     //     return {
     //         count: count,
@@ -42,9 +43,61 @@ async function getAllRecipes(parent,args,context,info) {
                 result.forEach((el)=>{
                             el.id = mongoose.Types.ObjectId(el._id)
                         })
+                    console.log(`Aggregate Apply for getActiveMenu: ${aggregateQuery}`)
+                console.log(count)
+                return {
+                page: args.page,
+                count: count,
+                max_page: Math.ceil(count/args.limit),
+                data: result
+                };
+}
+
+async function getAllRecipes(parent,args,context,info) {
+    let count = await recipes.count();
+    let aggregateQuery = []
+    if(args.recipe_name){
+        aggregateQuery.push({
+            $match: {recipe_name: new RegExp(args.recipe_name, "i")}
+        })
+    }
+    if (args.page){
+        aggregateQuery.push({
+            $skip: (args.page - 1)*args.limit
+        },
+        {$limit: args.limit})
+    }
+    if(args.input){
+        args.input.recipe_name === 'asc' ? aggregateQuery.push({$sort: {recipe_name:1}}) : aggregateQuery.push({$sort: {recipe_name:-1}})
+    }
+    if(aggregateQuery.length === 0){
+        let result = await recipes.find()
+        result.forEach((el)=>{
+            el.id = mongoose.Types.ObjectId(el._id)
+        })
+        console.log(`No Aggregate Apply for getAKkRecipes: ${result[1].recipe_name}`)
+        
+        return {
+            count: count,
+            // page: 0,
+            data: result
+            };
+    }
+    let result = await recipes.aggregate(aggregateQuery);
+                result.forEach((el)=>{
+                            el.id = mongoose.Types.ObjectId(el._id)
+                            // el.recipe_name = args.recipe_name
+                        console.log(el)
+                        
+                        })
+                        console.log(aggregateQuery)
+                        count = result.length;
+                        
                 return {
                 count: count,
                 page: args.page,
+                max_page: Math.ceil(count/args.limit),
+
                 data: result
                 };
 }
@@ -57,6 +110,9 @@ async function createRecipe(parent,args,context,info){
         })
     }
     const recipe= {}
+    recipe.description = args.description
+    recipe.price = args.price
+    recipe.img = args.img
     recipe.recipe_name = args.recipe_name
     recipe.ingredients = args.input
     let checkIngredient = await ingredients.find()
@@ -70,10 +126,19 @@ async function createRecipe(parent,args,context,info){
         }
     })
     const newRecipe = await recipes.create(recipe)
+    console.log(`Create Recipe: ${newRecipe}`)
+
     return newRecipe
 }
 async function updateRecipe(parent,args,context){
-    const recipe = await recipes.findByIdAndUpdate(args.id,args,{
+    const recipe = await recipes.findByIdAndUpdate(args.id,{
+        recipe_name: args.recipe_name,
+        description: args.description,
+        price: args.price,
+        img: args.img,
+        status: args.status,
+        ingredients: args.input
+    },{
         new: true
     })
     if(recipe){
@@ -82,6 +147,7 @@ async function updateRecipe(parent,args,context){
                 message: 'Put Appropriate Ingredient_ID!'
             })
         }) 
+        console.log(`Update Recipe: ${recipe.recipe_name}`)
         return recipe
         }
     throw new ApolloError('FooError', {
@@ -122,6 +188,16 @@ async function getAvailable(parent, args, context, info) {
     }
     return Math.min(...minStock);
 }
+async function isUsed(parent, args, context) {
+    const ingredients = []
+    console.log(parent)
+    return true
+    // await ingredients.find({
+    //     ingredient_id: {
+    //         $in: parent.ingredients.map((el) => el.ingredient_id)
+    //     }
+    // })
+}
 
 
 async function getIngredientLoader(parent, args, context){
@@ -136,6 +212,7 @@ const resolverRecipe = {
     Query: {
         
         getOneRecipe,
+        getActiveMenu,
         getAllRecipes
     },
     Mutation: {
@@ -148,6 +225,7 @@ const resolverRecipe = {
     },
     Recipe: {
         available: getAvailable
-    }
+    },
+
 }
 module.exports = resolverRecipe;

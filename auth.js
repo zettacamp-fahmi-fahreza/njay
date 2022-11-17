@@ -27,7 +27,7 @@ module.exports = {
         getOneIngredient: authMiddleware,
         getAllIngredient: authMiddleware,
         getOneRecipe: authMiddleware,
-        // getAllRecipes: authMiddleware,
+        getAllRecipes: authMiddleware,
         getOneTransaction: authMiddleware,
         getAllTransactions: authMiddleware,
     },

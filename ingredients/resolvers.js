@@ -56,8 +56,10 @@ async function getAllIngredient(parent,args,context){
                             el.id = mongoose.Types.ObjectId(el._id)
                         })
                         console.log(`total time: ${Date.now()- tick} ms`)
+                        count = result.length
                 return {
                 count: count,
+                max_page: Math.ceil(count/args.limit),
                 page: args.page,
                 data: result
                 };

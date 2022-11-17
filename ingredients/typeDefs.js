@@ -7,11 +7,13 @@ type Ingredient{
     name: String
     stock: Int
     status: Enum
+    is_used: Boolean
     }
 type ingredientsPage{
     count: Int
     page: Int
     data: [Ingredient]
+    max_page: Int
     }
 type respondDelIngredient {
     message: String
