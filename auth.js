@@ -32,6 +32,7 @@ module.exports = {
         getAllTransactions: authMiddleware,
     },
     Mutation: {
+        checkoutTransaction: authMiddleware,
         addUser: authMiddleware,
         updateUser: authMiddleware,
         deleteUser: authMiddleware,
@@ -42,7 +43,7 @@ module.exports = {
         updateRecipe: authMiddleware,
         createRecipe: authMiddleware,
         createTransaction: authMiddleware,
-        deleteTransaction: authMiddleware,
+        updateTransaction: authMiddleware,
         // addCart: authMiddleware,
     }
 }

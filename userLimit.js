@@ -24,7 +24,7 @@ module.exports = {
         getOneRecipe: testMiddleware,
         getAllRecipes: testMiddleware,
         getOneTransaction: testMiddleware,
-        getAllTransactions: testMiddleware,
+        // getAllTransactions: testMiddleware,
     },
     Mutation: {
         addUser: testMiddleware,
@@ -36,7 +36,7 @@ module.exports = {
         deleteRecipe: testMiddleware,
         updateRecipe: testMiddleware,
         createRecipe: testMiddleware,
-        deleteTransaction: testMiddleware,
+        // updateTransaction: testMiddleware,
     }
 }
 

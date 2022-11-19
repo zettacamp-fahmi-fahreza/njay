@@ -161,17 +161,19 @@ const transactionsSchema = new mongoose.Schema({
             amount: {
                 type: Number,
                 required: true,
-                min: 0
+                min: 0,
+                default:1
             },
             note: {
-                type: String
+                type: String,
+                default: ""
             }
         }
     ],
     order_status: {
         type: String,
         enum: ["success","pending", "failed"],
-        default: "pending"
+        // default: "pending"
     },
     order_date: {
         type : String,
@@ -184,10 +186,25 @@ const transactionsSchema = new mongoose.Schema({
     },
     totalPrice: {
         type: Number,
-        required: true,
+        // required: true,
         min: 0
 
-    }
+    },
+    ingredientMap: [
+        {
+            _id: false,
+            ingredient_id:{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Ingredients",
+
+            },
+            stock: {
+                type: Number,
+                // required: true,
+                min: 0
+            }
+        }
+    ]
 })
 
 const cartSchema = new mongoose.Schema({

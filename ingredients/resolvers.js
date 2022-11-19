@@ -7,9 +7,9 @@ async function getAllIngredient(parent,args,context){
     let count = await ingredients.count();
     let aggregateQuery = [
         
-            // {$match: {
-            //     status: 'active'
-            // }}
+            {$match: {
+                status: 'active'
+            }}
         
     ]
     if (args.page){
@@ -34,10 +34,10 @@ async function getAllIngredient(parent,args,context){
     }
     if(args.stock <= 0){
         throw new ApolloError('FooError', {
-            message: 'Stock Cannot Be Zero!'
+            message: 'Stock Cannot Be Zero or Lower!'
           });
     }
-    if(aggregateQuery.length === 0){
+    if(!aggregateQuery.length){
         let result = await ingredients.find({
             // status: 'active'
         })
@@ -59,7 +59,7 @@ async function getAllIngredient(parent,args,context){
                         count = result.length
                 return {
                 count: count,
-                max_page: Math.ceil(count/args.limit),
+                max_page: Math.ceil(count/args.limit) || 0,
                 page: args.page,
                 data: result
                 };
