@@ -6,9 +6,10 @@ const bcrypt = require('bcrypt');
 const { GraphQLScalarType ,Kind} = require ('graphql');
 const moment = require('moment');
 const { ifError } = require('assert');
+const getAvailable = require('../recipes/resolvers')
 
 async function getAllTransactions(parent,args,context,info) {
-    let count = await transactions.count();
+    let count = await transactions.count({status: 'active',user_id: mongoose.Types.ObjectId(context.req.payload) });
     let aggregateQuery = [
         
             {$match: {
@@ -64,7 +65,6 @@ async function getAllTransactions(parent,args,context,info) {
         }
         )
         count = await transactions.count({order_status : new RegExp(args.order_status, "i")})
-        console.log(count)
     }
     if(args.order_date){
 
@@ -85,12 +85,24 @@ async function getAllTransactions(parent,args,context,info) {
     //         data: result
     //         };
     // }
-    let result = await transactions.aggregate(aggregateQuery);
+     let result = await transactions.aggregate(aggregateQuery);
                 result.forEach((el)=>{
                             el.id = mongoose.Types.ObjectId(el._id)
                         })
+                        // console.log(`total time: ${Date.now()- tick} ms`)
+                        if(!args.page){
+                            count = result.length
+                        }
+                        const max_page = Math.ceil(count/args.limit) || 1
+                        if(max_page < args.page){
+                            throw new ApolloError('FooError', {
+                                message: 'Page is Empty!'
+                            });
+
+                        }
                 return {
                 count: count,
+                max_page: max_page,
                 page: args.page,
                 data: result
                 };
@@ -111,10 +123,8 @@ async function getUserLoader(parent,args,context){
     }
 }
 async function getRecipeLoader(parent,args,context){
-    console.log(parent)
     if (parent.recipe_id){
         let check = await context.recipeLoader.load(parent.recipe_id)
-        // console.log(check)
         return check
     }
 }
@@ -124,19 +134,17 @@ async function getRecipeLoader(parent,args,context){
 // }
 async function reduceIngredientStock(arrIngredient){
     for(let ingredient of arrIngredient){
-        // console.log(ingredient)
         await ingredients.findByIdAndUpdate(ingredient.ingredient_id,{
             stock: ingredient.stock
         },{
             new: true
         })
-        // console.log(ingredient.stock)
-
     }
 }
 
 
 async function validateStockIngredient(user_id, menus){
+try{
     let menuTransaction = new transactions({menu : menus })
     menuTransaction = await transactions.populate(menuTransaction, {
         path: 'menu.recipe_id',
@@ -144,6 +152,9 @@ async function validateStockIngredient(user_id, menus){
             path : "ingredients.ingredient_id"
         }
     })
+    
+    let available = 0
+    let price = 0
     let totalPrice = 0
     const ingredientMap = []
     for ( let menu of menuTransaction.menu){
@@ -152,8 +163,11 @@ async function validateStockIngredient(user_id, menus){
                 message: "Menu Cannot be ordered as it is Unpublished!"
             })
         }
+        // console.log(menu.recipe_id)
+        available = menu.recipe_id.available
+        price = menu.recipe_id.price
         const amount = menu.amount
-        totalPrice = menu.recipe_id.price * amount
+        totalPrice = price * amount
         for( let ingredient of menu.recipe_id.ingredients){
                 ingredientMap.push({ingredient_id: ingredient.ingredient_id,
                     stock:ingredient.ingredient_id.stock - (ingredient.stock_used * amount)})
@@ -165,7 +179,12 @@ async function validateStockIngredient(user_id, menus){
         }
     }
     // await reduceIngredientStock(ingredientMap)
-    return new transactions({user_id: user_id, menu: menus,order_status: "pending",totalPrice: totalPrice, ingredientMap: ingredientMap})
+    return new transactions({user_id: user_id, menu: menus,order_status: "pending",totalPrice: totalPrice,onePrice:price,available:available ,ingredientMap: ingredientMap})
+    }
+    catch(err){
+        throw new ApolloError('FooError',err)
+    }
+
 }
 
 async function createTransaction(parent,args,context){
@@ -182,8 +201,7 @@ async function createTransaction(parent,args,context){
     const newTransaction = await validateStockIngredient(context.req.payload, args.input)
     await transactions.create(newTransaction)
     // reduceIngredientStock(newTransaction)
-    console.log(`Total Time: ${Date.now()- tick} ms`)
-    console.log("iin Create Transaction")
+    console.log(`Total Time Create Transaction: ${Date.now()- tick} ms`)
     return newTransaction
 }
 
@@ -192,11 +210,19 @@ async function checkoutTransaction(parent,args,context){
         order_status: 'pending',
         user_id: context.req.payload
     })
-    transaction.forEach((ingredient) => {
-        reduceIngredientStock(ingredient.ingredientMap)
-        ingredient.order_status = 'success'
-        // console.log(ingredient)
+    order_status = null
+    let menu = null
+    let newTransaction = null
+    transaction.forEach(async(el) => {
+        menu = el.menu
     })
+    newTransaction = await validateStockIngredient(context.req.payload, menu)
+    reduceIngredientStock(newTransaction.ingredientMap)
+    transaction.forEach(async(el) => {
+        el.order_status= 'success'
+    })
+
+
     await transactions.create(transaction)
     return transaction
 }
@@ -205,17 +231,19 @@ async function updateTransaction(parent,args,context){
     let amount = 0
     let recipeId = ""
     let note = ""
+    // console.log(transaction)
     transaction.menu.forEach((el) => {
         amount = el.amount
         recipeId = el.recipe_id
         note = el.note
     })
-    console.log(amount)
     if(args.note){
         transaction.menu.forEach((el) => {
         note = args.note
         return( el.note= note)
     })
+    await transaction.save()
+    return transaction
 }
     if(args.option === 'delete'){
         const updateTransaction = await transactions.findByIdAndUpdate(args.id,{
@@ -223,36 +251,37 @@ async function updateTransaction(parent,args,context){
         }, {
             new : true
         })
-    if(updateTransaction)return updateTransaction
-    }
+
+        const data = await transactions.findById(args.id)
+        if(updateTransaction)return data    }
     if(args.option === 'push'){
         const updateTransaction = await transactions.findOneAndUpdate(
                 {_id: args.id,},
-                {$set: {
+                {$set: {  
+                    "totalPrice": transaction.totalPrice + transaction.onePrice,                  
                     "menu":{
                         "amount": amount + 1,
                         "recipe_id": recipeId,
                         "note": note
-                    }
-                }
+                    },
+                },
             },
-            // {
-            //     arrayFilters:[ {"element.recipe_id" :{$eq: "636dae7d54dc248b764e7f7d"}}]
-            // },
             {new : true}
                 )
         
-                
-    // transaction.totalPrice = transaction.menu.recipe_id.price * amount
-    // console.log(transaction.menu)
+    
+    // transaction.totalPrice = transaction.onePrice * amount
+    // await transaction.save()
 
-    if(updateTransaction)return transaction
+ const data = await transactions.findById(args.id)
+    if(updateTransaction)return data
     }
 
     if(args.option === 'pull'){
         const updateTransaction = await transactions.findOneAndUpdate(
                 {_id: args.id},
                 {$set: {
+                    "totalPrice": transaction.totalPrice - transaction.onePrice,                  
                     "menu":{
                         "amount": amount - 1,
                         "recipe_id": recipeId,
@@ -261,11 +290,13 @@ async function updateTransaction(parent,args,context){
                 }
             },{new : true}
                 )
-    if(updateTransaction)return transaction
-    }
     
+            // transaction.totalPrice = transaction.onePrice * amount
+            // await transaction.save()
 
-   
+            const data = await transactions.findById(args.id)
+            if(updateTransaction)return data
+            }
     
     throw new ApolloError('FooError', {
         message: 'Wrong ID!'
@@ -284,10 +315,12 @@ const resolverTransaction = {
         getAllTransactions
     },
     Transaction: {
-        user_id : getUserLoader
+        user_id : getUserLoader,
+        // available: getAvailable
     },
     Menu: {
         recipe_id: getRecipeLoader
     }
+
 }
 module.exports = resolverTransaction

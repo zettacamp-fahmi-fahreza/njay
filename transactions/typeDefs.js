@@ -26,11 +26,16 @@ type Transaction {
         order_date: String
         status: Enum
         totalPrice: Int
+        onePrice: Int
+        available: Int
+        # finalTotalPrice: Int
     }
 type transactionPage{
     count: Int
     page: Int
     data: [Transaction]
+    max_page: Int
+    finalTotalPrice: Int
     }
 enum enumStatus {
         success
@@ -50,7 +55,7 @@ type Query {
 type Mutation {
     createTransaction( input: menuInput) : Transaction
     checkoutTransaction: [Transaction]
-    updateTransaction(id:ID! option: enumUpdate!, note: String recipe_id: ID) : Transaction!
+    updateTransaction(id:ID! option: enumUpdate, note: String recipe_id: ID) : Transaction!
 }
 `
 

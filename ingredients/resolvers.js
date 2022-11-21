@@ -1,10 +1,11 @@
 const mongoose = require('mongoose');
 const {ingredients, recipes} = require('../schema');
 const { ApolloError} = require('apollo-errors');
+const { ifError } = require('assert');
 
 async function getAllIngredient(parent,args,context){
     const tick = Date.now()
-    let count = await ingredients.count();
+    let count = await ingredients.count({status: 'active'});
     let aggregateQuery = [
         
             {$match: {
@@ -56,10 +57,18 @@ async function getAllIngredient(parent,args,context){
                             el.id = mongoose.Types.ObjectId(el._id)
                         })
                         console.log(`total time: ${Date.now()- tick} ms`)
-                        count = result.length
+                        if(!args.page){
+                            count = result.length
+                        }
+                        const max_page = Math.ceil(count/args.limit) || 1
+                        if(max_page < args.page){
+                            throw new ApolloError('FooError', {
+                                message: 'Page is Empty!'
+                            });
+                        }
                 return {
                 count: count,
-                max_page: Math.ceil(count/args.limit) || 0,
+                max_page: max_page,
                 page: args.page,
                 data: result
                 };

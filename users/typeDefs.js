@@ -36,6 +36,7 @@ type usersPage {
     count: Int
     page: Int
     users: [User]
+    max_page: Int
     }
 type respondDelUser {
     message: String
@@ -59,6 +60,8 @@ type userLogin {
     first_name: String
     last_name: String
     userType: userType
+    role: Role
+    
     
 }
 type respondAddCart {

@@ -137,6 +137,9 @@ const recipesSchema = new mongoose.Schema({
         // trim: true,
         required: true
     },
+    available: {
+        type: Number
+    }
     // publish_status: {
     //     type: String,
     //     enum: ['unpublished', 'published'],
@@ -184,11 +187,22 @@ const transactionsSchema = new mongoose.Schema({
         enum: ['active', 'deleted'],
         default: 'active'
     },
+
+    onePrice: {
+        type: Number,
+        // required: true,
+        min: 0
+    },
+    // finalTotalPrice: {
+    //     type: Number,
+    //     // required: true,
+    //     min: 0
+
+    // },
     totalPrice: {
         type: Number,
         // required: true,
         min: 0
-
     },
     ingredientMap: [
         {

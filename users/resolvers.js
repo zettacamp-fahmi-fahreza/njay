@@ -54,7 +54,7 @@ async function getAllUsers(parent,args, context){
     // return getAll
     // verifyJwt(context)
     console.log(args.input.email === 'asc',typeof args.input.email)
-    let count = await users.count();
+    let count = await users.count({status: 'active'});
     let aggregateQuery = [
         {$match: {
             status: 'active'
@@ -113,14 +113,26 @@ async function getAllUsers(parent,args, context){
             //         };
             // }
             let result = await users.aggregate(aggregateQuery);
-                result.forEach((el)=>{
-                            el.id = mongoose.Types.ObjectId(el._id)
-                        })
-                return {
-                count: count,
-                page: args.page,
-                users: result
-                };
+            result.forEach((el)=>{
+                        el.id = mongoose.Types.ObjectId(el._id)
+                    })
+                    console.log(`total time: ${Date.now()- tick} ms`)
+                    if(!args.page){
+                        count = result.length
+                    }
+                    const max_page = Math.ceil(count/args.limit) || 1
+                    if(max_page < args.page){
+                        throw new ApolloError('FooError', {
+                            message: 'Page is Empty!'
+                        });
+
+                    }
+            return {
+            count: count,
+            max_page: max_page,
+            page: args.page,
+            data: result
+            };
             
 }
 async function getOneUser(parent,args, context){
@@ -198,7 +210,8 @@ async function getToken(parent, args,context){
         fullName: userCheck.first_name + ' ' + userCheck.last_name, 
         first_name: userCheck.first_name, 
         last_name: userCheck.last_name,
-        userType: userCheck.userType
+        userType: userCheck.userType,
+        role: userCheck.role
     }}
 }
 

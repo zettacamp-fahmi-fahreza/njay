@@ -6,7 +6,7 @@ const { ApolloError} = require('apollo-errors');
 
 
 async function getActiveMenu(parent,args,context,info) {
-    let count = await recipes.count();
+    let count = await recipes.count({status:'active'});
     let aggregateQuery = [
         
             {$match: {
@@ -28,34 +28,46 @@ async function getActiveMenu(parent,args,context,info) {
     if(args.input){
         args.input.recipe_name === 'asc' ? aggregateQuery.push({$sort: {recipe_name:1}}) : aggregateQuery.push({$sort: {recipe_name:-1}})
     }
-    // if(aggregateQuery.length === 0){
-    //     let result = await recipes.find()
-    //     result.forEach((el)=>{
-    //         el.id = mongoose.Types.ObjectId(el._id)
-    //     })
-    //     return {
-    //         count: count,
-    //         // page: 0,
-    //         data: result
-    //         };
-    // }
+    if(aggregateQuery.length === 0){
+        let result = await recipes.find()
+        result.forEach((el)=>{
+            el.id = mongoose.Types.ObjectId(el._id)
+        })
+        return {
+            count: count,
+            // page: 0,
+            data: result
+            };
+    }
     let result = await recipes.aggregate(aggregateQuery);
-                result.forEach((el)=>{
-                            el.id = mongoose.Types.ObjectId(el._id)
-                        })
-                    console.log(`Aggregate Apply for getActiveMenu: ${aggregateQuery}`)
-                console.log(count)
-                return {
-                page: args.page,
-                count: count,
-                max_page: Math.ceil(count/args.limit),
-                data: result
-                };
+    result.forEach((el)=>{
+                el.id = mongoose.Types.ObjectId(el._id)
+            })
+            // console.log(`total time: ${Date.now()- tick} ms`)
+            if(!args.page){
+                count = result.length
+            }
+            const max_page = Math.ceil(count/args.limit) || 1
+            if(max_page < args.page){
+                throw new ApolloError('FooError', {
+                    message: 'Page is Empty!'
+                });
+            }
+    return {
+    count: count,
+    max_page: max_page,
+    page: args.page,
+    data: result
+    };
 }
 
 async function getAllRecipes(parent,args,context,info) {
-    let count = await recipes.count();
-    let aggregateQuery = []
+    let count = await recipes.count({status: 'active' && 'unpublished'});
+    let aggregateQuery = [
+        {$match: {
+            status: {$not: 'deleted'},
+        }}
+    ]
     if(args.recipe_name){
         aggregateQuery.push({
             $match: {recipe_name: new RegExp(args.recipe_name, "i")}
@@ -79,27 +91,30 @@ async function getAllRecipes(parent,args,context,info) {
         
         return {
             count: count,
-            // page: 0,
+            page: 1,
             data: result
             };
     }
     let result = await recipes.aggregate(aggregateQuery);
-                result.forEach((el)=>{
-                            el.id = mongoose.Types.ObjectId(el._id)
-                            // el.recipe_name = args.recipe_name
-                        console.log(el)
-                        
-                        })
-                        console.log(aggregateQuery)
-                        count = result.length;
-                        
-                return {
-                count: count,
-                page: args.page,
-                max_page: Math.ceil(count/args.limit),
-
-                data: result
-                };
+    result.forEach((el)=>{
+                el.id = mongoose.Types.ObjectId(el._id)
+            })
+            // console.log(`total time: ${Date.now()- tick} ms`)
+            if(!args.page){
+                count = result.length
+            }
+            const max_page = Math.ceil(count/args.limit) || 1
+            if(max_page < args.page){
+                throw new ApolloError('FooError', {
+                    message: 'Page is Empty!'
+                });
+            }
+    return {
+    count: count,
+    max_page: max_page,
+    page: args.page,
+    data: result
+    };
 }
 
 //ERRORR WANNA DEVELOP A FUNCTION WHERE INGREDIENT NOT FOUND BUT FAILED
@@ -141,12 +156,14 @@ async function updateRecipe(parent,args,context){
     },{
         new: true
     })
+    if(args.input){
+    args.input.forEach((el) => {
+        if(el.ingredient_id.length < 10)throw new ApolloError('FooError',{
+            message: 'Put Appropriate Ingredient_ID!'
+        })
+    }) 
+    }
     if(recipe){
-        args.input.forEach((el) => {
-            if(el.ingredient_id.length < 10)throw new ApolloError('FooError',{
-                message: 'Put Appropriate Ingredient_ID!'
-            })
-        }) 
         console.log(`Update Recipe: ${recipe.recipe_name}`)
         return recipe
         }
@@ -188,16 +205,16 @@ async function getAvailable(parent, args, context, info) {
     }
     return Math.min(...minStock);
 }
-async function isUsed(parent, args, context) {
-    const ingredients = []
-    console.log(parent)
-    return true
-    // await ingredients.find({
-    //     ingredient_id: {
-    //         $in: parent.ingredients.map((el) => el.ingredient_id)
-    //     }
-    // })
-}
+// async function isUsed(parent, args, context) {
+//     const ingredients = []
+//     console.log(parent)
+//     return true
+//     // await ingredients.find({
+//     //     ingredient_id: {
+//     //         $in: parent.ingredients.map((el) => el.ingredient_id)
+//     //     }
+//     // })
+// }
 
 
 async function getIngredientLoader(parent, args, context){
@@ -226,6 +243,10 @@ const resolverRecipe = {
     Recipe: {
         available: getAvailable
     },
+    // Transaction: {
+    //     available: getAvailable
+    // },
 
 }
+module.exports = getAvailable
 module.exports = resolverRecipe;
