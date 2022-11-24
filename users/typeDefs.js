@@ -1,5 +1,4 @@
 const { ApolloServer,gql } = require('apollo-server');
-// const {users,ingredients,recipes,transactionsSchema} = require('./schema');
 
 const userTypeDefs = gql`#graphql
 type User {
@@ -21,9 +20,9 @@ type User {
     }
 
     input userSorting {
-        email: enumSorting
-        last_name: enumSorting
-        first_name: enumSorting
+        email: String
+        last_name: String
+        first_name: String
     }
     type userType {
         userType_permission: [userType_permit]

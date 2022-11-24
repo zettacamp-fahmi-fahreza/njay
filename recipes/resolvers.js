@@ -8,16 +8,16 @@ const { ApolloError} = require('apollo-errors');
 async function getActiveMenu(parent,args,context,info) {
     let count = await recipes.count({status:'active'});
     let aggregateQuery = [
-        
             {$match: {
                 status: 'active'
-            }}
-        
+            }},
+            {$sort: {_id:-1}}
     ]
     if(args.recipe_name){
         aggregateQuery.push({
             $match: {recipe_name: new RegExp(args.recipe_name, "i")}
         })
+        count = await recipes.count({recipe_name: new RegExp(args.recipe_name, "i")});
     }
     if (args.page){
         aggregateQuery.push({
@@ -43,7 +43,6 @@ async function getActiveMenu(parent,args,context,info) {
     result.forEach((el)=>{
                 el.id = mongoose.Types.ObjectId(el._id)
             })
-            // console.log(`total time: ${Date.now()- tick} ms`)
             if(!args.page){
                 count = result.length
             }
@@ -62,16 +61,23 @@ async function getActiveMenu(parent,args,context,info) {
 }
 
 async function getAllRecipes(parent,args,context,info) {
-    let count = await recipes.count({status: 'active' && 'unpublished'});
+    let count = await recipes.count({status:{$ne:'deleted'} });
+    console.log(count)
+
     let aggregateQuery = [
         {$match: {
-            status: {$not: 'deleted'},
-        }}
+            status:  {$ne: 'deleted'},
+        }},            
+        {$sort: {_id:-1}}
+
+
     ]
     if(args.recipe_name){
         aggregateQuery.push({
             $match: {recipe_name: new RegExp(args.recipe_name, "i")}
         })
+        count = await recipes.count({recipe_name: new RegExp(args.recipe_name, "i")});
+
     }
     if (args.page){
         aggregateQuery.push({
@@ -82,27 +88,14 @@ async function getAllRecipes(parent,args,context,info) {
     if(args.input){
         args.input.recipe_name === 'asc' ? aggregateQuery.push({$sort: {recipe_name:1}}) : aggregateQuery.push({$sort: {recipe_name:-1}})
     }
-    if(aggregateQuery.length === 0){
-        let result = await recipes.find()
-        result.forEach((el)=>{
-            el.id = mongoose.Types.ObjectId(el._id)
-        })
-        console.log(`No Aggregate Apply for getAKkRecipes: ${result[1].recipe_name}`)
-        
-        return {
-            count: count,
-            page: 1,
-            data: result
-            };
-    }
     let result = await recipes.aggregate(aggregateQuery);
     result.forEach((el)=>{
                 el.id = mongoose.Types.ObjectId(el._id)
             })
-            // console.log(`total time: ${Date.now()- tick} ms`)
-            if(!args.page){
-                count = result.length
-            }
+            // if(!args.page){
+            //     count = result.length
+            // }
+
             const max_page = Math.ceil(count/args.limit) || 1
             if(max_page < args.page){
                 throw new ApolloError('FooError', {
@@ -205,16 +198,6 @@ async function getAvailable(parent, args, context, info) {
     }
     return Math.min(...minStock);
 }
-// async function isUsed(parent, args, context) {
-//     const ingredients = []
-//     console.log(parent)
-//     return true
-//     // await ingredients.find({
-//     //     ingredient_id: {
-//     //         $in: parent.ingredients.map((el) => el.ingredient_id)
-//     //     }
-//     // })
-// }
 
 
 async function getIngredientLoader(parent, args, context){

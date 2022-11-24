@@ -1,67 +1,77 @@
 const mongoose = require('mongoose');
 const {ingredients, recipes} = require('../schema');
 const { ApolloError} = require('apollo-errors');
-const { ifError } = require('assert');
 
-async function getAllIngredient(parent,args,context){
+async function getAllIngredient(parent,{name,stock,page,limit,input},context){
     const tick = Date.now()
     let count = await ingredients.count({status: 'active'});
     let aggregateQuery = [
-        
             {$match: {
                 status: 'active'
-            }}
+            }},
+            {$sort: {_id:-1}}
         
     ]
-    if (args.page){
+
+    if(name){
         aggregateQuery.push({
-            $skip: (args.page - 1)*args.limit
-        },
-        {$limit: args.limit})
-    }
-    if(args.name){
-        aggregateQuery.push({
-            $match: {name: new RegExp(args.name, "i")}
+            $match: {name: new RegExp(name, "i")}
         },{
             $sort: {name: 1}
         })
+        count = await ingredients.count({name: new RegExp(name, "i")});
     }
-    if(args.stock && args.stock>0){
+
+    if(stock && stock>0){
         aggregateQuery.push({
-            $match: {stock: {$gte :args.stock}}
+            $match: {stock: {$gte :stock}}
         },{
             $sort: {stock: 1}
         })
     }
-    if(args.stock <= 0){
+    if(stock <= 0){
         throw new ApolloError('FooError', {
             message: 'Stock Cannot Be Zero or Lower!'
           });
     }
-    if(!aggregateQuery.length){
-        let result = await ingredients.find({
-            // status: 'active'
-        })
-        result.forEach((el)=>{
-            el.id = mongoose.Types.ObjectId(el._id)
-        })
-        // console.log(`total time: ${Date.now()- tick} ms`)
-        return {
-            count: count,
-            // page: 0,
-            data: result
-            };
+    if (page){
+        aggregateQuery.push({
+            $skip: (page - 1)*limit
+        },
+        {$limit: limit})
     }
+    if(input){
+    if(input.name){
+        input.name === 'asc' ? aggregateQuery.push({$sort: {name:1}}) : aggregateQuery.push({$sort: {name:-1}})
+    }
+    if(input.stock){
+        input.stock === 'asc' ? aggregateQuery.push({$sort: {stock:1}}) : aggregateQuery.push({$sort: {stock:-1}})
+    }
+}
+    // if(!aggregateQuery.length){
+    //     let result = await ingredients.find({
+    //         // status: 'active'
+    //     })
+    //     result.forEach((el)=>{
+    //         el.id = mongoose.Types.ObjectId(el._id)
+    //     })
+    //     // console.log(`total time: ${Date.now()- tick} ms`)
+    //     return {
+    //         count: count,
+    //         // page: 0,
+    //         data: result
+    //         };
+    // }
     let result = await ingredients.aggregate(aggregateQuery);
                 result.forEach((el)=>{
                             el.id = mongoose.Types.ObjectId(el._id)
                         })
                         console.log(`total time: ${Date.now()- tick} ms`)
-                        if(!args.page){
+                        if(!page){
                             count = result.length
                         }
-                        const max_page = Math.ceil(count/args.limit) || 1
-                        if(max_page < args.page){
+                        const max_page = Math.ceil(count/limit) || 1
+                        if(max_page < page){
                             throw new ApolloError('FooError', {
                                 message: 'Page is Empty!'
                             });
@@ -69,7 +79,7 @@ async function getAllIngredient(parent,args,context){
                 return {
                 count: count,
                 max_page: max_page,
-                page: args.page,
+                page: page,
                 data: result
                 };
 }

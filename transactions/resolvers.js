@@ -8,42 +8,42 @@ const moment = require('moment');
 const { ifError } = require('assert');
 const getAvailable = require('../recipes/resolvers')
 
-async function getAllTransactions(parent,args,context,info) {
+async function getAllTransactions(parent,{page, limit, last_name_user, recipe_name,order_status, order_date, input},context,info) {
     let count = await transactions.count({status: 'active',user_id: mongoose.Types.ObjectId(context.req.payload) });
     let aggregateQuery = [
-        
             {$match: {
                 status: 'active',
                 user_id: mongoose.Types.ObjectId(context.req.payload)
-            }}
-        
+            }},
+            {$sort: {_id:-1}}
+
     ]
-    if (args.page){
+    if (page){
         aggregateQuery.push({
-            $skip: (args.page - 1)*args.limit
+            $skip: (page - 1)*limit
         },
-        {$limit: args.limit})
+        {$limit: limit})
     }
-    if(args.last_name_user){
+    if(last_name_user){
         aggregateQuery.push({
-            // usersLookup
                 $lookup:
                 {
-                  from: "users",
-                  localField: "user_id",
-                  foreignField: "_id",
-                  as: "users"
+                from: "users",
+                localField: "user_id",
+                foreignField: "_id",
+                as: "users"
                 }
             
         },
         {
-            $match: {"users.last_name" :new RegExp(args.last_name_user, "i")}
+            $match: {"users.last_name" :new RegExp(last_name_user, "i")}
         }
         )
+        count = await transactions.count({"users.last_name" : new RegExp(last_name_user, "i")})
+
     }
-    if(args.recipe_name){
+    if(recipe_name){
         aggregateQuery.push({
-            // usersLookup
                 $lookup:
                 {
                   from: "recipes",
@@ -51,59 +51,51 @@ async function getAllTransactions(parent,args,context,info) {
                   foreignField: "_id",
                   as: "recipes"
                 }
-            
         },
         {
-            $match: {"recipes.recipe_name" : new RegExp(args.recipe_name, "i")}
+            $match: {"recipes.recipe_name" : new RegExp(recipe_name, "i")}
         }
         )
-    }
-    if(args.order_status){
-        aggregateQuery.push(
-        {
-            $match: {"order_status" : new RegExp(args.order_status, "i")}
-        }
-        )
-        count = await transactions.count({order_status : new RegExp(args.order_status, "i")})
-    }
-    if(args.order_date){
+        count = await transactions.count({"recipes.recipe_name" : new RegExp(recipe_name, "i")})
 
+    }
+    if(order_status){
         aggregateQuery.push(
         {
-            $match: {"order_date" : moment(args.order_date, "MM-DD-YYYY").locale("id-ID").format("LL")}
+            $match: {"order_status" : new RegExp(order_status, "i")}
         }
         )
+        count = await transactions.count({order_status : new RegExp(order_status, "i")})
     }
-    // if(aggregateQuery.length === 0){
-    //     let result = await transactions.find()
-    //     result.forEach((el)=>{
-    //         el.id = mongoose.Types.ObjectId(el.id)
-    //     })
-    //     return {
-    //         count: count,
-    //         // page: 0,
-    //         data: result
-    //         };
-    // }
+    if(order_date){
+        aggregateQuery.push(
+        {
+            $match: {"order_date" : moment(order_date, "MM-DD-YYYY").locale("id-ID").format("LL")}
+        }
+        )
+        count = await transactions.count({order_date : new RegExp(order_date, "i")})
+    }
+    if(input){
+        input.order_date === 'asc' ? aggregateQuery.push({$sort: {order_date:1}}) : aggregateQuery.push({$sort: {order_date:-1}})
+    }
      let result = await transactions.aggregate(aggregateQuery);
                 result.forEach((el)=>{
                             el.id = mongoose.Types.ObjectId(el._id)
                         })
                         // console.log(`total time: ${Date.now()- tick} ms`)
-                        if(!args.page){
-                            count = result.length
-                        }
-                        const max_page = Math.ceil(count/args.limit) || 1
-                        if(max_page < args.page){
+                        // if(!page){
+                        //     count = result.length
+                        // }
+                        const max_page = Math.ceil(count/limit) || 1
+                        if(max_page < page){
                             throw new ApolloError('FooError', {
                                 message: 'Page is Empty!'
                             });
-
                         }
                 return {
                 count: count,
                 max_page: max_page,
-                page: args.page,
+                page: page,
                 data: result
                 };
 }
@@ -129,9 +121,6 @@ async function getRecipeLoader(parent,args,context){
     }
 }
 
-// async function validateStockIngredient(){
-//     let checkId = 
-// }
 async function reduceIngredientStock(arrIngredient){
     for(let ingredient of arrIngredient){
         await ingredients.findByIdAndUpdate(ingredient.ingredient_id,{
@@ -152,7 +141,6 @@ try{
             path : "ingredients.ingredient_id"
         }
     })
-    
     let available = 0
     let price = 0
     let totalPrice = 0
@@ -163,7 +151,6 @@ try{
                 message: "Menu Cannot be ordered as it is Unpublished!"
             })
         }
-        // console.log(menu.recipe_id)
         available = menu.recipe_id.available
         price = menu.recipe_id.price
         const amount = menu.amount
@@ -178,13 +165,11 @@ try{
             }
         }
     }
-    // await reduceIngredientStock(ingredientMap)
     return new transactions({user_id: user_id, menu: menus,order_status: "pending",totalPrice: totalPrice,onePrice:price,available:available ,ingredientMap: ingredientMap})
     }
     catch(err){
         throw new ApolloError('FooError',err)
     }
-
 }
 
 async function createTransaction(parent,args,context){
@@ -197,10 +182,8 @@ async function createTransaction(parent,args,context){
     const transaction = {}
     transaction.user_id = context.req.payload
     transaction.menu = args.input
-
     const newTransaction = await validateStockIngredient(context.req.payload, args.input)
     await transactions.create(newTransaction)
-    // reduceIngredientStock(newTransaction)
     console.log(`Total Time Create Transaction: ${Date.now()- tick} ms`)
     return newTransaction
 }
@@ -221,8 +204,6 @@ async function checkoutTransaction(parent,args,context){
     transaction.forEach(async(el) => {
         el.order_status= 'success'
     })
-
-
     await transactions.create(transaction)
     return transaction
 }
@@ -231,7 +212,6 @@ async function updateTransaction(parent,args,context){
     let amount = 0
     let recipeId = ""
     let note = ""
-    // console.log(transaction)
     transaction.menu.forEach((el) => {
         amount = el.amount
         recipeId = el.recipe_id
@@ -251,7 +231,6 @@ async function updateTransaction(parent,args,context){
         }, {
             new : true
         })
-
         const data = await transactions.findById(args.id)
         if(updateTransaction)return data    }
     if(args.option === 'push'){
@@ -268,12 +247,14 @@ async function updateTransaction(parent,args,context){
             },
             {new : true}
                 )
-        
-    
-    // transaction.totalPrice = transaction.onePrice * amount
-    // await transaction.save()
-
- const data = await transactions.findById(args.id)
+const data = await transactions.findById(args.id)
+            // console.log(data.available)
+            data.menu.forEach((amount) => {
+                if(amount > data.available){
+                    throw new ApolloError('FooError',{
+                        message: 'Insufficient Stock'})
+                }
+            })
     if(updateTransaction)return data
     }
 
@@ -290,17 +271,30 @@ async function updateTransaction(parent,args,context){
                 }
             },{new : true}
                 )
-    
-            // transaction.totalPrice = transaction.onePrice * amount
-            // await transaction.save()
-
             const data = await transactions.findById(args.id)
             if(updateTransaction)return data
             }
     
     throw new ApolloError('FooError', {
         message: 'Wrong ID!'
-      });
+    });
+}
+
+async function availableLoader(parent, args, context, info) {
+    const minStock = []
+    // console.log(parent)
+    for(let recipe of parent.menu){
+        const recipeId = await recipes.findById(recipe.recipe_id)
+        // console.log(recipeId)
+         for (let ingredient of recipeId.ingredients) {
+        const recipe_ingredient = await ingredients.findById(ingredient.ingredient_id);
+        if (!recipe_ingredient) throw new ApolloError(`Ingredient with ID: ${ingredient.ingredient_id} not found`, "404");
+        minStock.push(Math.floor(recipe_ingredient.stock / ingredient.stock_used));
+    }
+    return Math.min(...minStock);
+        
+    }
+   
 }
 
 const resolverTransaction = {
@@ -316,7 +310,7 @@ const resolverTransaction = {
     },
     Transaction: {
         user_id : getUserLoader,
-        // available: getAvailable
+        available: availableLoader
     },
     Menu: {
         recipe_id: getRecipeLoader

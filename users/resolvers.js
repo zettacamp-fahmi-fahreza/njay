@@ -3,101 +3,54 @@ const {users} = require('../schema');
 const { ApolloError} = require('apollo-errors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const validateStockIngredient = require('../transactions/resolvers');
-
-// const admin_permission = [
-//         "getAllUsers",
-//         "getOneUser",
-//         "addUser",
-//         "updateUser",
-//         "deleteUser",
-//         "getToken",
-//         "createTransaction",
-//         "deleteTransaction",
-//         "getOneTransaction",
-//         "getAllTransactions",
-//         "getOneRecipe",
-//         "getAllRecipes",
-//         "deleteRecipe",
-//         "updateRecipe",
-//         "createRecipe",
-//         "getOneIngredient",
-//         "getAllIngredient",
-//         "addIngredient",
-//         "updateIngredient",
-//         "deleteIngredient"
-// ]
-// const user_permission = 
-// [
-//     "getToken",
-//     "createTransaction"
-//   ]
 
 async function addUser(parent,args, context, info){
     args.password = await bcrypt.hash(args.password, 5)
     
     const newUser = new users(args)
-    // if (args.role === 'user'){
-    //     newUser.user_permission = user_permission
-    // }else{
-    //     newUser.user_permission = admin_permission
-    // }
     await newUser.save()
     return newUser;
 }
 
-
-
-
-async function getAllUsers(parent,args, context){
-    // const getAll = await users.find()
-    // return getAll
-    // verifyJwt(context)
-    console.log(args.input.email === 'asc',typeof args.input.email)
+async function getAllUsers(parent,{email,last_name,first_name,page,limit,input}, context){
     let count = await users.count({status: 'active'});
     let aggregateQuery = [
         {$match: {
             status: 'active'
-        }}
+        }},
+        {$sort: {_id:-1}}
+
     ]
-    if (args.page){
+    if (page){
         aggregateQuery.push({
-            $skip: (args.page - 1)*args.limit
+            $skip: (page - 1)*limit
         },
-        {$limit: args.limit})
+        {$limit: limit})
         
     }
-    if(args.email){
+    if(email){
         aggregateQuery.push({
-            $match: {email: args.email}
+            $match: {email: email}
         },
-        // {
-        //     $sort: {email: 1}
-        // }
         )
+        count = await recipes.count({recipe_name: new RegExp(recipe_name, "i")});
     }
-    if(args.input){
-        args.input.email ? args.input.email === 'asc' ? aggregateQuery.push({$sort: {email:1}}) : aggregateQuery.push({$sort: {email:-1}}): null
-        args.input.first_name ? args.input.first_name === 'asc' ? aggregateQuery.push({$sort: {first_name:1}}) : aggregateQuery.push({$sort: {first_name:-1}}) : null
-        args.input.last_name ? args.input.last_name === 'asc' ? aggregateQuery.push({$sort: {last_name:1}}) : aggregateQuery.push({$sort: {last_name:-1}}) : null
+    if(input){
+        input.email ? input.email === 'asc' ? aggregateQuery.push({$sort: {email:1}}) : aggregateQuery.push({$sort: {email:-1}}): null
+        input.first_name ? input.first_name === 'asc' ? aggregateQuery.push({$sort: {first_name:1}}) : aggregateQuery.push({$sort: {first_name:-1}}) : null
+        input.last_name ? input.last_name === 'asc' ? aggregateQuery.push({$sort: {last_name:1}}) : aggregateQuery.push({$sort: {last_name:-1}}) : null
     }
     console.log(aggregateQuery)
-    if(args.last_name){
+    if(last_name){
         aggregateQuery.push({
-            $match: {last_name: new RegExp(args.last_name, "i") }
+            $match: {last_name: new RegExp(last_name, "i") }
         },
-        // {
-        //     $sort: {last_name: 1}
-        // }
         )
     }
-    if(args.first_name){
+    if(first_name){
         aggregateQuery.push({
-            $match: {first_name:  new RegExp(args.first_name, "i") }
+            $match: {first_name:  new RegExp(first_name, "i") }
         },
-        // {
-        //     $sort: {first_name: 1}
-        // }
         )
     }
     
@@ -117,11 +70,11 @@ async function getAllUsers(parent,args, context){
                         el.id = mongoose.Types.ObjectId(el._id)
                     })
                     console.log(`total time: ${Date.now()- tick} ms`)
-                    if(!args.page){
+                    if(!page){
                         count = result.length
                     }
-                    const max_page = Math.ceil(count/args.limit) || 1
-                    if(max_page < args.page){
+                    const max_page = Math.ceil(count/limit) || 1
+                    if(max_page < page){
                         throw new ApolloError('FooError', {
                             message: 'Page is Empty!'
                         });
@@ -130,7 +83,7 @@ async function getAllUsers(parent,args, context){
             return {
             count: count,
             max_page: max_page,
-            page: args.page,
+            page: page,
             data: result
             };
             
@@ -214,39 +167,6 @@ async function getToken(parent, args,context){
         role: userCheck.role
     }}
 }
-
-// async function addCart(parent,args,context){
-//     const tick = Date.now()
-//     if(args.input.length == 0){
-//         throw new ApolloError('FooError', {
-//             message: "Input cannot be empty!"
-//         })
-//     }
-//     // const transaction = {}
-//     // transaction.user_id = context.req.payload
-//     // transaction.menu = args.input
-//     // const userActive = await users.findById(context.req.payload)
-//     // // const newTransaction = await validateStockIngredient(context.req.payload, args.input)
-//     // console.log(context.req.payload)
-//     // userActive.cart = args.input
-//     const newTransaction = await users.updateOne(
-//         {_id: context.req.payload},
-//         {$push: {cart: args.input}}
-//         )
-//     // findByIdAndUpdate(context.req.payload, {
-//     //     cart: args.input
-//     // },{
-//     //     new: true
-//     // })
-//     // console.log(newTransaction.cart)
-//     // await transactions.create(newTransaction)
-//     // reduceIngredientStock(newTransaction)
-//     console.log(`Total Time: ${Date.now()- tick} ms`)
-//     return {
-//         message: "Succesfully Added To Cart",
-//         // cart: newTransaction.cart
-//     }
-// }
 
 
 

@@ -1,5 +1,4 @@
 const { ApolloServer,gql } = require('apollo-server');
-const {users,ingredients,recipes,transactionsSchema} = require('../schema');
 
 const recipeTypeDefs = gql`
 
@@ -35,7 +34,7 @@ const recipeTypeDefs = gql`
         recipe_name: enumSorting
     }
     input recipeSorting{
-        recipe_name: enumSorting
+        recipe_name: String
     }
     type Recipe {
     id: ID

@@ -30,6 +30,13 @@ type Transaction {
         available: Int
         # finalTotalPrice: Int
     }
+    type transactionSort{
+        order_date: enumSorting
+    }
+    input transactionSorting{
+        order_date: String
+    }
+
 type transactionPage{
     count: Int
     page: Int
@@ -50,7 +57,7 @@ enum enumUpdate {
 
 type Query {
     getOneTransaction(id:ID!) : Transaction!
-    getAllTransactions(page: Int limit: Int last_name_user: String recipe_name:String order_status: String order_date: String) : transactionPage!
+    getAllTransactions(page: Int limit: Int last_name_user: String recipe_name:String order_status: String order_date: String input: transactionSorting) : transactionPage!
 }
 type Mutation {
     createTransaction( input: menuInput) : Transaction

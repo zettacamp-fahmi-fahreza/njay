@@ -1,5 +1,4 @@
 const { ApolloServer,gql } = require('apollo-server');
-const {users,ingredients,recipes,transactionsSchema} = require('../schema');
 
 const ingredientTypeDefs = gql`#graphql
 type Ingredient{
@@ -8,6 +7,14 @@ type Ingredient{
     stock: Int
     status: Enum
     is_used: Boolean
+    }
+    type ingredientSort{
+        name: enumSorting
+        stock: enumSorting
+    }
+    input ingredientSorting{
+        name: String
+        stock: String
     }
 type ingredientsPage{
     count: Int
@@ -26,7 +33,7 @@ type Mutation{
     }
 type Query {
     getOneIngredient(id:ID!): Ingredient!
-    getAllIngredient(name: String,stock: Int,page:Int, limit: Int): ingredientsPage
+    getAllIngredient(name: String,stock: Int,page:Int, limit: Int, input: ingredientSorting): ingredientsPage
     }`
 
 module.exports = {ingredientTypeDefs}
