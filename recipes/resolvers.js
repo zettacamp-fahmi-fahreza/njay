@@ -1,7 +1,8 @@
 
 const mongoose = require('mongoose');
-const {recipes,ingredients} = require('../schema');
+const {recipes,ingredients,transactions} = require('../schema');
 const { ApolloError} = require('apollo-errors');
+const { ifError } = require('assert');
 
 
 
@@ -25,8 +26,13 @@ async function getActiveMenu(parent,args,context,info) {
         },
         {$limit: args.limit})
     }
-    if(args.input){
-        args.input.recipe_name === 'asc' ? aggregateQuery.push({$sort: {recipe_name:1}}) : aggregateQuery.push({$sort: {recipe_name:-1}})
+    if(args.sorting){
+        if(args.sorting.recipe_name){
+            args.sorting.recipe_name === 'asc' ? aggregateQuery.push({$sort: {recipe_name:1}}) : aggregateQuery.push({$sort: {recipe_name:-1}})
+        }
+        if(args.sorting.price){
+            args.sorting.price === 'asc' ? aggregateQuery.push({$sort: {price:1}}) : aggregateQuery.push({$sort: {price:-1}})
+        }
     }
     if(aggregateQuery.length === 0){
         let result = await recipes.find()
@@ -62,7 +68,8 @@ async function getActiveMenu(parent,args,context,info) {
 
 async function getAllRecipes(parent,args,context,info) {
     let count = await recipes.count({status:{$ne:'deleted'} });
-    console.log(count)
+    // console.log(count)
+    
 
     let aggregateQuery = [
         {$match: {
@@ -86,7 +93,12 @@ async function getAllRecipes(parent,args,context,info) {
         {$limit: args.limit})
     }
     if(args.input){
-        args.input.recipe_name === 'asc' ? aggregateQuery.push({$sort: {recipe_name:1}}) : aggregateQuery.push({$sort: {recipe_name:-1}})
+        if(args.input.recipe_name){
+            args.input.recipe_name === 'asc' ? aggregateQuery.push({$sort: {recipe_name:1}}) : aggregateQuery.push({$sort: {recipe_name:-1}})
+        }
+        if(args.input.price){
+            args.input.price === 'asc' ? aggregateQuery.push({$sort: {price:1}}) : aggregateQuery.push({$sort: {price:-1}})
+        }
     }
     let result = await recipes.aggregate(aggregateQuery);
     result.forEach((el)=>{
@@ -149,6 +161,51 @@ async function updateRecipe(parent,args,context){
     },{
         new: true
     })
+    if(args.status === "unpublished" || recipe.status === "unpublished"){
+        // console.log(transaction)
+        const tes = await transactions.findOneAndUpdate(
+            {"menu.recipe_id": mongoose.Types.ObjectId(args.id)}
+            ,{
+            $set: {
+                recipeStatus: "unpublished"
+            }
+        },{new : true}
+        )
+
+        // let transaction = await transactions.findOne({
+        //     "menu.recipe_id": mongoose.Types.ObjectId(args.id),
+        //     order_status: "pending"
+        // })
+
+
+        await transactions.findOne(
+            {"menu.recipe_id": mongoose.Types.ObjectId(args.id)}
+
+        )
+    }
+
+    if(args.status === "active" || recipe.status === "active"){
+        // console.log(transaction)
+        const tes = await transactions.findOneAndUpdate(
+            {"menu.recipe_id": mongoose.Types.ObjectId(args.id)}
+            ,{
+            $set: {
+                recipeStatus: "active"
+            }
+        },{new : true}
+        )
+
+        // let transaction = await transactions.findOne({
+        //     "menu.recipe_id": mongoose.Types.ObjectId(args.id),
+        //     order_status: "pending"
+        // })
+
+
+        await transactions.findOne(
+            {"menu.recipe_id": mongoose.Types.ObjectId(args.id)}
+
+        )
+    }
     if(args.input){
     args.input.forEach((el) => {
         if(el.ingredient_id.length < 10)throw new ApolloError('FooError',{

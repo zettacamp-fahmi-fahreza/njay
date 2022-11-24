@@ -8,16 +8,19 @@ const moment = require('moment');
 const { ifError } = require('assert');
 const getAvailable = require('../recipes/resolvers')
 
-async function getAllTransactions(parent,{page, limit, last_name_user, recipe_name,order_status, order_date, input},context,info) {
+async function getAllTransactions(parent,{page, limit, last_name_user, recipe_name,order_status, order_date, sort,userFind},context,info) {
     let count = await transactions.count({status: 'active',user_id: mongoose.Types.ObjectId(context.req.payload) });
+    let isUser = await users.findById(context.req.payload)
+    // console.log(isUser.role)
+
     let aggregateQuery = [
             {$match: {
                 status: 'active',
-                user_id: mongoose.Types.ObjectId(context.req.payload)
+                // user_id: mongoose.Types.ObjectId(context.req.payload)
             }},
             {$sort: {_id:-1}}
-
     ]
+    
     if (page){
         aggregateQuery.push({
             $skip: (page - 1)*limit
@@ -75,8 +78,24 @@ async function getAllTransactions(parent,{page, limit, last_name_user, recipe_na
         )
         count = await transactions.count({order_date : new RegExp(order_date, "i")})
     }
-    if(input){
-        input.order_date === 'asc' ? aggregateQuery.push({$sort: {order_date:1}}) : aggregateQuery.push({$sort: {order_date:-1}})
+    if(sort){
+        sort.order_date === 'asc' ? aggregateQuery.push({$sort: {order_date:1}}) : aggregateQuery.push({$sort: {order_date:-1}})
+    }
+    if(isUser.role === 'user'){
+        aggregateQuery.push({
+            $match: {
+                user_id: mongoose.Types.ObjectId(context.req.payload)
+            }
+        })
+    }
+    if(isUser.role === 'admin'){
+        if(userFind){
+            aggregateQuery.push({
+                $match: {
+                    user_id: mongoose.Types.ObjectId(userFind)
+                }
+            })
+        }
     }
      let result = await transactions.aggregate(aggregateQuery);
                 result.forEach((el)=>{
@@ -141,16 +160,28 @@ try{
             path : "ingredients.ingredient_id"
         }
     })
+    if(!menuTransaction.menu){
+        throw new ApolloError("FooError",{
+            message: "Cart is Empty"
+        })
+    }
     let available = 0
     let price = 0
     let totalPrice = 0
+    let recipeStatus = null
     const ingredientMap = []
+
     for ( let menu of menuTransaction.menu){
+        // console.log(menu.recipe_id)
         if(menu.recipe_id.status === 'unpublished'){
+            // recipeName = []
+            
+            // console.log(menu.recipe_id)
             throw new ApolloError("FooError",{
                 message: "Menu Cannot be ordered as it is Unpublished!"
             })
         }
+        recipeStatus = menu.recipe_id.status
         available = menu.recipe_id.available
         price = menu.recipe_id.price
         const amount = menu.amount
@@ -165,12 +196,78 @@ try{
             }
         }
     }
-    return new transactions({user_id: user_id, menu: menus,order_status: "pending",totalPrice: totalPrice,onePrice:price,available:available ,ingredientMap: ingredientMap})
+    return new transactions({user_id: user_id, menu: menus,order_status: "pending",recipeStatus: recipeStatus,totalPrice: totalPrice,onePrice:price,available:available ,ingredientMap: ingredientMap})
     }
     catch(err){
         throw new ApolloError('FooError',err)
     }
 }
+async function validateCheckout(user_id, menus){
+    try{
+        let menuTransaction = null
+        let menuu = null
+        menus.forEach(async(el) => {
+            menuu = (el)
+            // menuTransaction = new transactions({menu : el })
+            // menuTransaction = await transactions.populate(menuTransaction, {
+            //     path: 'menu.recipe_id',
+            //     populate: {
+            //         path : "ingredients.ingredient_id"
+            //     }
+            // })
+            // console.log(menuTransaction)
+        })
+        console.log(menuu)
+
+        // let menuTransaction = new transactions({menu : menus })
+        // for(a of menuTransaction.menu){
+            // console.log(a)
+            // menuTransaction = await transactions.populate(menuTransaction, {
+            //     path: 'menu.recipe_id',
+            //     populate: {
+            //         path : "ingredients.ingredient_id"
+            //     }
+            // })
+        // }
+
+        // menuTransaction = await transactions.populate(menuTransaction, {
+        //     path: 'menu.recipe_id',
+        //     populate: {
+        //         path : "ingredients.ingredient_id"
+        //     }
+        // })
+        // console.log(menuTransaction)
+        let available = 0
+        let price = 0
+        let totalPrice = 0
+        const ingredientMap = []
+        for ( let menu of menuTransaction.menu){
+            // console.log(menu.recipe_id)
+            if(menu.recipe_id.status === 'unpublished'){
+                throw new ApolloError("FooError",{
+                    message: `Menu ${menu.recipe_id.recipe_name} Cannot be ordered as it is Unpublished!`
+                })
+            }
+            available = menu.recipe_id.available
+            price = menu.recipe_id.price
+            const amount = menu.amount
+            totalPrice = price * amount
+            for( let ingredient of menu.recipe_id.ingredients){
+                    ingredientMap.push({ingredient_id: ingredient.ingredient_id,
+                        stock:ingredient.ingredient_id.stock - (ingredient.stock_used * amount)})
+                if(ingredient.ingredient_id.stock < ingredient.stock_used * amount){
+                    throw new ApolloError('FooError',{
+                        message: 'stock ingredient not enough'
+                    })
+                }
+            }
+        }
+        return new transactions({user_id: user_id, menu: menus,order_status: "pending",totalPrice: totalPrice,onePrice:price,available:available ,ingredientMap: ingredientMap})
+        }
+        catch(err){
+            throw new ApolloError('FooError',err)
+        }
+    }
 
 async function createTransaction(parent,args,context){
     const tick = Date.now()
@@ -193,12 +290,37 @@ async function checkoutTransaction(parent,args,context){
         order_status: 'pending',
         user_id: context.req.payload
     })
+    // console.log(transaction.)
+    let recipeStatus = null
     order_status = null
     let menu = null
     let newTransaction = null
-    transaction.forEach(async(el) => {
+    transaction.forEach((el) => {
         menu = el.menu
+        if(el.recipeStatus === "unpublished"){
+            recipeStatus = el.recipeStatus
+        }
+
+
+    // if(el.recipeStatus === "unpublished"){
+    //     console.log("sini woy")
+    //     throw new ApolloError("FooError",{
+    //         message: `Menu:
+    //          Cannot be ordered as it is Unpublished!`
+    //     })
+    // }
     })
+    console.log(recipeStatus)
+
+
+    // console.log(transaction)
+    if(recipeStatus === "unpublished"){
+        console.log("sini woy")
+        throw new ApolloError("FooError",{
+            message: `Menu:
+             Cannot be ordered as it is Unpublished!`
+        })
+    }
     newTransaction = await validateStockIngredient(context.req.payload, menu)
     reduceIngredientStock(newTransaction.ingredientMap)
     transaction.forEach(async(el) => {
@@ -217,6 +339,15 @@ async function updateTransaction(parent,args,context){
         recipeId = el.recipe_id
         note = el.note
     })
+
+    if(args.note === ""){
+        transaction.menu.forEach((el) => {
+            note = ""
+            return( el.note= note)
+        })
+        await transaction.save()
+    return transaction
+    }
     if(args.note){
         transaction.menu.forEach((el) => {
         note = args.note

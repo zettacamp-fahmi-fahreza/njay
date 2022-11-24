@@ -193,6 +193,10 @@ const transactionsSchema = new mongoose.Schema({
         // required: true,
         min: 0
     },
+    recipeStatus:{
+        type: String,
+        enum: ["active", "deleted","unpublished"],
+    },
     // finalTotalPrice: {
     //     type: Number,
     //     // required: true,

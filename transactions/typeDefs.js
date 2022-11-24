@@ -28,13 +28,14 @@ type Transaction {
         totalPrice: Int
         onePrice: Int
         available: Int
+        recipeStatus: enumRecipe
         # finalTotalPrice: Int
     }
     type transactionSort{
         order_date: enumSorting
     }
     input transactionSorting{
-        order_date: String
+        order_date: enumSorting
     }
 
 type transactionPage{
@@ -57,7 +58,7 @@ enum enumUpdate {
 
 type Query {
     getOneTransaction(id:ID!) : Transaction!
-    getAllTransactions(page: Int limit: Int last_name_user: String recipe_name:String order_status: String order_date: String input: transactionSorting) : transactionPage!
+    getAllTransactions(page: Int limit: Int last_name_user: String recipe_name:String order_status: String order_date: String sort: transactionSorting userFind:ID) : transactionPage!
 }
 type Mutation {
     createTransaction( input: menuInput) : Transaction

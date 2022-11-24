@@ -12,7 +12,7 @@ async function addUser(parent,args, context, info){
     return newUser;
 }
 
-async function getAllUsers(parent,{email,last_name,first_name,page,limit,input}, context){
+async function getAllUsers(parent,{email,last_name,first_name,page,limit,sort}, context){
     let count = await users.count({status: 'active'});
     let aggregateQuery = [
         {$match: {
@@ -35,10 +35,10 @@ async function getAllUsers(parent,{email,last_name,first_name,page,limit,input},
         )
         count = await recipes.count({recipe_name: new RegExp(recipe_name, "i")});
     }
-    if(input){
-        input.email ? input.email === 'asc' ? aggregateQuery.push({$sort: {email:1}}) : aggregateQuery.push({$sort: {email:-1}}): null
-        input.first_name ? input.first_name === 'asc' ? aggregateQuery.push({$sort: {first_name:1}}) : aggregateQuery.push({$sort: {first_name:-1}}) : null
-        input.last_name ? input.last_name === 'asc' ? aggregateQuery.push({$sort: {last_name:1}}) : aggregateQuery.push({$sort: {last_name:-1}}) : null
+    if(sort){
+        sort.email ? sort.email === 'asc' ? aggregateQuery.push({$sort: {email:1}}) : aggregateQuery.push({$sort: {email:-1}}): null
+        sort.first_name ? sort.first_name === 'asc' ? aggregateQuery.push({$sort: {first_name:1}}) : aggregateQuery.push({$sort: {first_name:-1}}) : null
+        sort.last_name ? sort.last_name === 'asc' ? aggregateQuery.push({$sort: {last_name:1}}) : aggregateQuery.push({$sort: {last_name:-1}}) : null
     }
     console.log(aggregateQuery)
     if(last_name){

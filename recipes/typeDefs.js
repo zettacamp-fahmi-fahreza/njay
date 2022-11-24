@@ -32,9 +32,12 @@ const recipeTypeDefs = gql`
 
     type recipeSort{
         recipe_name: enumSorting
+        price: enumSorting
     }
     input recipeSorting{
-        recipe_name: String
+        recipe_name: enumSorting
+        price: enumSorting
+        
     }
     type Recipe {
     id: ID
@@ -55,7 +58,7 @@ const recipeTypeDefs = gql`
     }
 
 type Query {
-    getActiveMenu(recipe_name: String,page: Int,limit: Int  input: recipeSorting): recipePage!
+    getActiveMenu(recipe_name: String,page: Int,limit: Int  sorting: recipeSorting): recipePage!
     getAllRecipes(recipe_name: String page: Int,limit: Int input: recipeSorting): recipePage!
 
     getOneRecipe(id:ID!): Recipe

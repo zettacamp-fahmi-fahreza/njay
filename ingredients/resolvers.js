@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const {ingredients, recipes} = require('../schema');
 const { ApolloError} = require('apollo-errors');
 
-async function getAllIngredient(parent,{name,stock,page,limit,input},context){
+async function getAllIngredient(parent,{name,stock,page,limit,sort},context){
     const tick = Date.now()
     let count = await ingredients.count({status: 'active'});
     let aggregateQuery = [
@@ -40,12 +40,12 @@ async function getAllIngredient(parent,{name,stock,page,limit,input},context){
         },
         {$limit: limit})
     }
-    if(input){
-    if(input.name){
-        input.name === 'asc' ? aggregateQuery.push({$sort: {name:1}}) : aggregateQuery.push({$sort: {name:-1}})
+    if(sort){
+    if(sort.name){
+        sort.name === 'asc' ? aggregateQuery.push({$sort: {name:1}}) : aggregateQuery.push({$sort: {name:-1}})
     }
-    if(input.stock){
-        input.stock === 'asc' ? aggregateQuery.push({$sort: {stock:1}}) : aggregateQuery.push({$sort: {stock:-1}})
+    if(sort.stock){
+        sort.stock === 'asc' ? aggregateQuery.push({$sort: {stock:1}}) : aggregateQuery.push({$sort: {stock:-1}})
     }
 }
     // if(!aggregateQuery.length){

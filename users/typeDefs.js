@@ -20,9 +20,9 @@ type User {
     }
 
     input userSorting {
-        email: String
-        last_name: String
-        first_name: String
+        email: enumSorting
+        last_name: enumSorting
+        first_name: enumSorting
     }
     type userType {
         userType_permission: [userType_permit]
@@ -91,7 +91,7 @@ type Mutation {
     # addCart( input: [menuInput]) : respondAddCart!
 }
 type Query {
-    getAllUsers(email:String,last_name: String,first_name:String,page: Int,limit: Int input:userSorting ) : usersPage!
+    getAllUsers(email:String,last_name: String,first_name:String,page: Int,limit: Int sort:userSorting ) : usersPage!
     getOneUser(email:String,id:ID): User!
 }`
 

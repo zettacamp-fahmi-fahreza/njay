@@ -13,8 +13,8 @@ type Ingredient{
         stock: enumSorting
     }
     input ingredientSorting{
-        name: String
-        stock: String
+        name: enumSorting
+        stock: enumSorting
     }
 type ingredientsPage{
     count: Int
@@ -33,7 +33,7 @@ type Mutation{
     }
 type Query {
     getOneIngredient(id:ID!): Ingredient!
-    getAllIngredient(name: String,stock: Int,page:Int, limit: Int, input: ingredientSorting): ingredientsPage
+    getAllIngredient(name: String,stock: Int,page:Int, limit: Int, sort: ingredientSorting): ingredientsPage
     }`
 
 module.exports = {ingredientTypeDefs}
