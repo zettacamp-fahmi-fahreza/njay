@@ -58,7 +58,7 @@ enum enumUpdate {
 
 type Query {
     getOneTransaction(id:ID!) : Transaction!
-    getAllTransactions(page: Int limit: Int last_name_user: String recipe_name:String order_status: String order_date: String sort: transactionSorting userFind:ID) : transactionPage!
+    getAllTransactions(page: Int limit: Int last_name_user: String isCart: Boolean recipe_name:String order_status: String order_date: String sort: transactionSorting userFind:ID) : transactionPage!
 }
 type Mutation {
     createTransaction( input: menuInput) : Transaction

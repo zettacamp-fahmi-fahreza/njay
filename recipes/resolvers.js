@@ -14,6 +14,13 @@ async function getActiveMenu(parent,args,context,info) {
             }},
             {$sort: {_id:-1}}
     ]
+    if(args.highlight === true) {
+        aggregateQuery.push({
+            $match: {
+                highlight: true
+            }
+        })
+    }
     if(args.recipe_name){
         aggregateQuery.push({
             $match: {recipe_name: new RegExp(args.recipe_name, "i")}
@@ -157,7 +164,8 @@ async function updateRecipe(parent,args,context){
         price: args.price,
         img: args.img,
         status: args.status,
-        ingredients: args.input
+        ingredients: args.input,
+        highlight: args.highlight
     },{
         new: true
     })

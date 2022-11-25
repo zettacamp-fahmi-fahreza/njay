@@ -49,6 +49,10 @@ const recipeTypeDefs = gql`
     img: String
     description: String
     category: Category
+
+    highlight: Boolean
+    isDiscount: Boolean
+    discountAmount: Int
     # sort: recipeSort
     # publish_status: Publish
     }
@@ -58,14 +62,14 @@ const recipeTypeDefs = gql`
     }
 
 type Query {
-    getActiveMenu(recipe_name: String,page: Int,limit: Int  sorting: recipeSorting): recipePage!
+    getActiveMenu(recipe_name: String,page: Int,limit: Int  sorting: recipeSorting highlight: Boolean): recipePage!
     getAllRecipes(recipe_name: String page: Int,limit: Int input: recipeSorting): recipePage!
 
     getOneRecipe(id:ID!): Recipe
 }
 type Mutation {
-    createRecipe(recipe_name: String! category: Category  img: String description: String price: Int! input:[ingredientInput]) : Recipe!
-    updateRecipe(id:ID! recipe_name: String img: String status: enumRecipe description: String price: Int input:[ingredientInput]): Recipe!
+    createRecipe(recipe_name: String! category: Category  img: String description: String price: Int! highlight: Boolean input:[ingredientInput]) : Recipe!
+    updateRecipe(id:ID! recipe_name: String img: String status: enumRecipe description: String price: Int highlight: Boolean input:[ingredientInput]): Recipe!
     deleteRecipe(id: ID!): respondDelRecipe!
 }`
 

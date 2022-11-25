@@ -139,7 +139,21 @@ const recipesSchema = new mongoose.Schema({
     },
     available: {
         type: Number
+    },
+    highlight: {
+        type: Boolean,
+        default: false
+    },
+    isDiscount: {
+        type: Boolean,
+        default: false
+    },
+    discountAmount: {
+        type: Number,
+        default: 0,
+        min: 0
     }
+
     // publish_status: {
     //     type: String,
     //     enum: ['unpublished', 'published'],
@@ -197,12 +211,7 @@ const transactionsSchema = new mongoose.Schema({
         type: String,
         enum: ["active", "deleted","unpublished"],
     },
-    // finalTotalPrice: {
-    //     type: Number,
-    //     // required: true,
-    //     min: 0
 
-    // },
     totalPrice: {
         type: Number,
         // required: true,

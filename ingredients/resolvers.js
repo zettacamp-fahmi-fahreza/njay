@@ -12,7 +12,6 @@ async function getAllIngredient(parent,{name,stock,page,limit,sort},context){
             {$sort: {_id:-1}}
         
     ]
-
     if(name){
         aggregateQuery.push({
             $match: {name: new RegExp(name, "i")}
@@ -86,6 +85,14 @@ async function getAllIngredient(parent,{name,stock,page,limit,sort},context){
 
 // ERRORR ADD REGEX HERE TO AVOID DUPICATION
 async function addIngredient(parent,args,context){
+    const findDuplicate = await ingredients.findOne({
+        name: new RegExp(args.name, "i")
+    })
+    if(findDuplicate){
+        throw new ApolloError('FooError', {
+            message: 'Ingredient Already Exists!'
+        })
+    }
     const newIngredient = new ingredients(args)
     await newIngredient.save()
     return newIngredient;

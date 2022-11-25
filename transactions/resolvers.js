@@ -6,44 +6,41 @@ const bcrypt = require('bcrypt');
 const { GraphQLScalarType ,Kind} = require ('graphql');
 const moment = require('moment');
 const { ifError } = require('assert');
-const getAvailable = require('../recipes/resolvers')
+const getAvailable = require('../recipes/resolvers');
+const { error } = require('console');
 
-async function getAllTransactions(parent,{page, limit, last_name_user, recipe_name,order_status, order_date, sort,userFind},context,info) {
+async function getAllTransactions(parent,{page, limit, last_name_user, recipe_name,order_status, order_date, isCart,sort,userFind},context,info) {
     let count = await transactions.count({status: 'active',user_id: mongoose.Types.ObjectId(context.req.payload) });
     let isUser = await users.findById(context.req.payload)
     // console.log(isUser.role)
+    let aggregateQuery = []
 
-    let aggregateQuery = [
+    if(isCart === true){
+        console.log("tes")
+        aggregateQuery.push(
+            {$match: {
+                status: 'active',
+                user_id: mongoose.Types.ObjectId(context.req.payload)
+            }},
+            {$sort: {_id:-1}}
+        )
+    }
+    if(isCart === false){
+        aggregateQuery.push(
             {$match: {
                 status: 'active',
                 // user_id: mongoose.Types.ObjectId(context.req.payload)
             }},
             {$sort: {_id:-1}}
-    ]
+        )
+    }
+    
     
     if (page){
         aggregateQuery.push({
             $skip: (page - 1)*limit
         },
         {$limit: limit})
-    }
-    if(last_name_user){
-        aggregateQuery.push({
-                $lookup:
-                {
-                from: "users",
-                localField: "user_id",
-                foreignField: "_id",
-                as: "users"
-                }
-            
-        },
-        {
-            $match: {"users.last_name" :new RegExp(last_name_user, "i")}
-        }
-        )
-        count = await transactions.count({"users.last_name" : new RegExp(last_name_user, "i")})
-
     }
     if(recipe_name){
         aggregateQuery.push({
@@ -87,6 +84,11 @@ async function getAllTransactions(parent,{page, limit, last_name_user, recipe_na
                 user_id: mongoose.Types.ObjectId(context.req.payload)
             }
         })
+        if(userFind || last_name_user){
+            throw new ApolloError('FooError', {
+                message: 'Not Authorized!'
+            });
+        }
     }
     if(isUser.role === 'admin'){
         if(userFind){
@@ -96,6 +98,24 @@ async function getAllTransactions(parent,{page, limit, last_name_user, recipe_na
                 }
             })
         }
+    if(last_name_user){
+        aggregateQuery.push({
+                $lookup:
+                {
+                from: "users",
+                localField: "user_id",
+                foreignField: "_id",
+                as: "users"
+                }
+            
+        },
+        {
+            $match: {"users.last_name" :new RegExp(last_name_user, "i")}
+        }
+        )
+        count = await transactions.count({"users.last_name" : new RegExp(last_name_user, "i")})
+
+    }
     }
      let result = await transactions.aggregate(aggregateQuery);
                 result.forEach((el)=>{
@@ -169,6 +189,7 @@ try{
     let price = 0
     let totalPrice = 0
     let recipeStatus = null
+    let discount = 10
     const ingredientMap = []
 
     for ( let menu of menuTransaction.menu){
