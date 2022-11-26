@@ -5,11 +5,7 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
 const { GraphQLScalarType ,Kind} = require ('graphql');
 const moment = require('moment');
-const { ifError } = require('assert');
-const getAvailable = require('../recipes/resolvers');
-const { error } = require('console');
-
-async function getAllTransactions(parent,{page, limit, last_name_user, recipe_name,order_status, order_date,order_date_start,order_date_end, fullName_user,isCart,sort,userFind},context,info) {
+async function getAllTransactions(parent,{page, limit, last_name_user,time_start,time_end ,recipe_name,order_status, order_date,order_date_start,order_date_end, fullName_user,isCart,sort,userFind},context,info) {
     let count = await transactions.count({status: 'active' });
     let isUser = await users.findById(context.req.payload)
     let aggregateQuery = []
@@ -35,14 +31,8 @@ async function getAllTransactions(parent,{page, limit, last_name_user, recipe_na
         )
     }
     
-    
-    if (page){
-        aggregateQuery.push({
-            $skip: (page - 1)*limit
-        },
-        {$limit: limit})
-    }
     if(recipe_name){
+        const findRecipes =await recipes.findOne({recipe_name:recipe_name})
         aggregateQuery.push({
                 $lookup:
                 {
@@ -56,7 +46,7 @@ async function getAllTransactions(parent,{page, limit, last_name_user, recipe_na
             $match: {"recipes.recipe_name" : new RegExp(recipe_name, "i")}
         }
         )
-        count = await transactions.count({status: 'active',"recipes.recipe_name" : new RegExp(recipe_name, "i")})
+        count = await transactions.count({order_status:"success",status: 'active',"menu.recipe_id": findRecipes._id})
 
     }
     if(order_status){
@@ -94,44 +84,7 @@ async function getAllTransactions(parent,{page, limit, last_name_user, recipe_na
     // }
     // }
 
-    if(order_date_start && order_date_end){
-        if(order_date_start === order_date_end){
-            aggregateQuery.push(
-                {
-                    $match: {"updatedAt" :{
-                        $gte:new Date(order_date_start)
-                    
-                }}
-                
-                }
-                )
-                count = await transactions.count({status: 'active' ,"updatedAt" : {
-                    $gte:new Date(order_date_start)
-                }})
-        }else{
-            aggregateQuery.push(
-            {
-                $match: {"updatedAt" :{
-                    $gte:new Date(order_date_start), $lte: new Date(order_date_end)
-                
-            }}
-            
-            }
-            )
-            count = await transactions.count({status: 'active' ,"updatedAt" : {
-                $gte:new Date(order_date_start), $lte: new Date(order_date_end)
-            }})
-        }
-        // if(order_date_start === order_date_end){
-        //     aggregateQuery.push(
-        //         {
-        //             $match: {"updatedAt" :{$eq: new Date(order_date_start)
-        //         }}
-        //         })
-        // }else{
 
-        // }
-    }
     if(sort){
         sort.createdAt === 'asc' ? aggregateQuery.push({$sort: {createdAt:1}}) : aggregateQuery.push({$sort: {createdAt:-1}})
     }
@@ -155,9 +108,10 @@ async function getAllTransactions(parent,{page, limit, last_name_user, recipe_na
                 }
             })
             count = await transactions.count({status: 'active' ,user_id: mongoose.Types.ObjectId(userFind)});
-
         }
     if(last_name_user){
+        const last_name =await users.findOne({last_name:last_name_user})
+
         aggregateQuery.push({
                 $lookup:
                 {
@@ -166,21 +120,13 @@ async function getAllTransactions(parent,{page, limit, last_name_user, recipe_na
                 foreignField: "_id",
                 as: "users"
                 },
-
         },
-        // {
-        //     $addField: {
-        //         "fullName" : {$concat:["$users.last_name", ", ","$users.first_name"]}
-        //     }
-        // },
-        {
-            $match: {"users.last_name" :new RegExp(last_name_user, "i")}
-        }
+        {$match: {"users.last_name" :new RegExp(last_name_user, "i")}}
         )
-        count = await transactions.count({status: 'active',"users.last_name" : new RegExp(last_name_user, "i")})
+        count = await transactions.count({order_status:"success",status: 'active',user_id: last_name._id})
     }
-
     if(fullName_user){
+        const userFullName =await users.findOne({fullName:fullName_user})
         aggregateQuery.push({
                 $lookup:
                 {
@@ -196,9 +142,139 @@ async function getAllTransactions(parent,{page, limit, last_name_user, recipe_na
             $match: {"users.fullName" :new RegExp(fullName_user, "i")}
         }
         )
-        count = await transactions.count({status: 'active',"users.fullName" : new RegExp(fullName_user, "i")})
+        count = await transactions.count({order_status:"success",status: 'active',user_id: userFullName._id})
+        console.log(count)
+    }
+    }
+
+    if(order_date_start && order_date_end){
+        if(time_start && time_end){
+            if(order_date_start === order_date_end){
+                aggregateQuery.push(
+                    {
+                        $match: {"updatedAt" :{
+                            $gte:new Date(`${order_date_start}T${time_start}`)
+                        
+                    }}
+                    
+                    }
+                    )
+                    count = await transactions.count({status: 'active' ,"updatedAt" : {
+                        $gte:new Date(`${order_date_start}T${time_start}`)
+                    }})
+            }else{
+                aggregateQuery.push(
+                    {
+                        $match: {"updatedAt" :{
+                            $gte:new Date(`${order_date_start}T${time_start}`),
+                            $lte: new Date(`${order_date_end}T${time_end}`)
+                        
+                    }}
+                    }
+                    )
+                    count = await transactions.count({status: 'active' ,"updatedAt" : {
+                        $gte:new Date(`${order_date_start}T${time_start}`),
+                        $lte: new Date(`${order_date_end}T${time_end}`)
+                    }})
+            }
+        }
+            if(order_date_start === order_date_end){
+                aggregateQuery.push(
+                    {
+                        $match: {"updatedAt" :{
+                            $gte:new Date(order_date_start)
+                        
+                    }}
+                    
+                    }
+                    )
+                    count = await transactions.count({status: 'active' ,"updatedAt" : {
+                        $gte:new Date(order_date_start)
+                    }})
+            }else{
+                aggregateQuery.push(
+                    {
+                        $match: {"updatedAt" :{
+                            $gte:new Date(order_date_start),
+                            $lte: new Date(order_date_end)
+                        
+                    }}
+                    }
+                    )
+                    count = await transactions.count({status: 'active' ,"updatedAt" : {
+                        $gte:new Date(order_date_start), $lte: new Date(order_date_end)
+                    }})
+                    console.log(count)
+            }
+        // if(order_date_start === order_date_end){
+        //     aggregateQuery.push(
+        //         {
+        //             $match: {"updatedAt" :{$eq: new Date(order_date_start)
+        //         }}
+        //         })
+        // }else{
+
+        // }
     }
     
+    if(order_date_start && !order_date_end){
+        if(time_start && !time_end){
+        aggregateQuery.push(
+            {
+                $match: {"updatedAt" :{
+                    $gte:new Date(`${order_date_start}T${time_start}`)
+                
+            }}
+            }
+            )
+            count = await transactions.count({status: 'active' ,"updatedAt" : {
+                $gte:new Date(`${order_date_start}T${time_start}`)
+            }})
+        }
+        aggregateQuery.push(
+            {
+                $match: {"updatedAt" :{
+                    $gte:new Date(order_date_start)
+                
+            }}
+            }
+            )
+            count = await transactions.count({status: 'active' ,"updatedAt" : {
+                $gte:new Date(order_date_start)
+            }})
+    }
+    if(order_date_end && !order_date_start){
+        if(time_end && !time_start){
+        aggregateQuery.push(
+            {
+                $match: {"updatedAt" :{
+                    $lte:new Date(`${order_date_end}T${time_end}`)
+                
+            }}
+            }
+            )
+            count = await transactions.count({status: 'active' ,"updatedAt" : {
+                $lte:new Date(`${order_date_end}T${time_end}`)
+            }})
+        }
+        aggregateQuery.push(
+            {
+                $match: {"updatedAt" :{
+                    $lte:new Date(order_date_end)
+                
+            }}
+            }
+            )
+            count = await transactions.count({status: 'active' ,"updatedAt" : {
+                $lte:new Date(order_date_end)
+            }})
+    }
+    
+    if (page){
+        aggregateQuery.push({
+            $skip: (page - 1)*limit
+        },
+        {$limit: limit})
     }
      let result = await transactions.aggregate(aggregateQuery);
                 result.forEach((el)=>{
@@ -243,7 +319,6 @@ async function getRecipeLoader(parent,args,context){
 }
 
 async function reduceIngredientStock(arrIngredient){
-    // console.log(arrIngredient)
     for(let ingredient of arrIngredient){
         await ingredients.findByIdAndUpdate(ingredient.ingredient_id,{
             stock: ingredient.stock
@@ -251,11 +326,13 @@ async function reduceIngredientStock(arrIngredient){
             new: true
         })
     }
+
 }
 
 
 async function validateStockIngredient(user_id, menus,checkout){
 try{
+    // console.log(menus)
     let menuTransaction = new transactions({menu : menus })
     menuTransaction = await transactions.populate(menuTransaction, {
         path: 'menu.recipe_id',
@@ -263,6 +340,7 @@ try{
             path : "ingredients.ingredient_id"
         }
     })
+    // console.log(menuTransaction)
     if(!menuTransaction.menu){
         throw new ApolloError("FooError",{
             message: "Cart is Empty"
@@ -271,8 +349,10 @@ try{
     let available = 0
     let price = 0
     let totalPrice = 0
+    // let stock = 0
     let recipeStatus = null
     let discount = 10
+    const stockIngredient = {};
     const ingredientMap = []
     // console.log(menuTransaction)
     for ( let menu of menuTransaction.menu){
@@ -285,98 +365,58 @@ try{
         }
         recipeStatus = menu.recipe_id.status
         available = menu.recipe_id.available
-        price = menu.recipe_id.price
+        if(menu.recipe_id.isDiscount === true){
+            price = menu.recipe_id.priceAfterDiscount
+        }else{
+            price = menu.recipe_id.price
+        }
         const amount = menu.amount
-        totalPrice = price * amount
+        // totalPrice = price * amount
         for( let ingredient of menu.recipe_id.ingredients){
-                ingredientMap.push({ingredient_id: ingredient.ingredient_id,
-                    stock:ingredient.ingredient_id.stock - (ingredient.stock_used * amount)})
-                    // console.log(ingredient.ingredient_id.stock <= 0)
-            if(ingredient.ingredient_id.stock < ingredient.stock_used * amount){
-                throw new ApolloError('FooError',{
-                    message: 'stock ingredient not enough'
+            // stock = ingredient.ingredient_id.stock
+                const ingredientRecipe = {ingredient_id: ingredient.ingredient_id._id,
+                    stock: ingredient.ingredient_id.stock - (ingredient.stock_used * amount)}
+                    if (ingredientRecipe.ingredient_id in stockIngredient) { }
+                    else { stockIngredient[ingredientRecipe.ingredient_id] = ingredient.ingredient_id.stock; }
+                    // console.log(ing)
+                    console.log(stockIngredient[ingredientRecipe.ingredient_id])
+                if(checkout === true){
+                    if(stockIngredient[ingredientRecipe.ingredient_id] < ingredient.stock_used * amount){
+                        throw new ApolloError('FooError',{
+                            message: 'KALAU PESAN BANYAK GITU GCUKUP'
+                        })
+                    }
+                }else{
+                    if(ingredient.ingredient_id.stock < ingredient.stock_used * amount){
+                        throw new ApolloError('FooError',{
+                            message: 'stock ingredient not enough'
+                        })
+                    }
+                }
+                
+            stockIngredient[ingredientRecipe.ingredient_id] -= (ingredient.stock_used * amount);
+                ingredientMap.push({
+                    ingredient_id: ingredient.ingredient_id._id,
+                    stock: stockIngredient[ingredientRecipe.ingredient_id],
                 })
-            }
         }
+        
+        totalPrice += menu.recipe_id.price * amount;
     }
-    if(checkout == true)
-    ingredientMap.forEach((el) => {
-        // console.log(`ini el.stock: ${el.stock}`)
-        if(el.stock < 0){
-            throw new ApolloError('FooError',{
-                message: 'stock ingredient not enough'
-            })
-        }
-    })
+    // ingredientMap.forEach((el) => {
+    //     // console.log(`ini el.stock: ${el.stock}`)
+    //     if(el.stock < 0){
+    //         throw new ApolloError('FooError',{
+    //             message: 'stock ingredient not enough'
+    //         })
+    //     }
+    // })
     return new transactions({user_id: user_id, menu: menus,order_status: "pending",recipeStatus: recipeStatus,totalPrice: totalPrice,onePrice:price,available:available ,ingredientMap: ingredientMap})
     }
     catch(err){
         throw new ApolloError('FooError',err)
     }
 }
-// async function validateCheckout(user_id, menus){
-//     try{
-//         let menuTransaction = null
-//         let menuu = null
-//         menus.forEach(async(el) => {
-//             menuu = (el)
-//             // menuTransaction = new transactions({menu : el })
-//             // menuTransaction = await transactions.populate(menuTransaction, {
-//             //     path: 'menu.recipe_id',
-//             //     populate: {
-//             //         path : "ingredients.ingredient_id"
-//             //     }
-//             // })
-//             // console.log(menuTransaction)
-//         })
-
-//         // let menuTransaction = new transactions({menu : menus })
-//         // for(a of menuTransaction.menu){
-//             // console.log(a)
-//             // menuTransaction = await transactions.populate(menuTransaction, {
-//             //     path: 'menu.recipe_id',
-//             //     populate: {
-//             //         path : "ingredients.ingredient_id"
-//             //     }
-//             // })
-//         // }
-
-//         // menuTransaction = await transactions.populate(menuTransaction, {
-//         //     path: 'menu.recipe_id',
-//         //     populate: {
-//         //         path : "ingredients.ingredient_id"
-//         //     }
-//         // })
-//         let available = 0
-//         let price = 0
-//         let totalPrice = 0
-//         const ingredientMap = []
-//         for ( let menu of menuTransaction.menu){
-//             if(menu.recipe_id.status === 'unpublished'){
-//                 throw new ApolloError("FooError",{
-//                     message: `Menu ${menu.recipe_id.recipe_name} Cannot be ordered as it is Unpublished!`
-//                 })
-//             }
-//             available = menu.recipe_id.available
-//             price = menu.recipe_id.price
-//             const amount = menu.amount
-//             totalPrice = price * amount
-//             for( let ingredient of menu.recipe_id.ingredients){
-//                     ingredientMap.push({ingredient_id: ingredient.ingredient_id,
-//                         stock:ingredient.ingredient_id.stock - (ingredient.stock_used * amount)})
-//                 if(ingredient.ingredient_id.stock < ingredient.stock_used * amount){
-//                     throw new ApolloError('FooError',{
-//                         message: 'stock ingredient not enough'
-//                     })
-//                 }
-//             }
-//         }
-//         return new transactions({user_id: user_id, menu: menus,order_status: "pending",totalPrice: totalPrice,onePrice:price,available:available ,ingredientMap: ingredientMap})
-//         }
-//         catch(err){
-//             throw new ApolloError('FooError',err)
-//         }
-//     }
 
 async function createTransaction(parent,args,context){
     const tick = Date.now()
@@ -401,14 +441,15 @@ async function checkoutTransaction(parent,args,context){
     })
     let recipeStatus = null
     order_status = null
-    let menu = null
+    let menu = []
     let newTransaction = null
     transaction.forEach((el) => {
-        menu = el.menu
         if(el.recipeStatus === "unpublished"){
             recipeStatus = el.recipeStatus
         }
-        console.log(menu)
+        el.menu.forEach((menus) => {
+            menu.push(menus)
+        })
     })
     if(recipeStatus === "unpublished"){
         throw new ApolloError("FooError",{
@@ -417,11 +458,12 @@ async function checkoutTransaction(parent,args,context){
         })
     }
     newTransaction = await validateStockIngredient(context.req.payload, menu,true)
+    // console.log(newTransaction)
     reduceIngredientStock(newTransaction.ingredientMap)
     transaction.forEach(async(el) => {
         el.order_status= 'success'
     })
-    await transactions.create(transaction)
+    // await transactions.create(transaction)
     return transaction
 }
 async function updateTransaction(parent,args,context){

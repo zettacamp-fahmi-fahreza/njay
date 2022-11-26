@@ -49,7 +49,7 @@ const recipeTypeDefs = gql`
     img: String
     description: String
     category: Category
-
+    priceAfterDiscount: Int
     highlight: Boolean
     isDiscount: Boolean
     discountAmount: Int
@@ -68,8 +68,8 @@ type Query {
     getOneRecipe(id:ID!): Recipe
 }
 type Mutation {
-    createRecipe(recipe_name: String! category: Category  img: String description: String price: Int! highlight: Boolean input:[ingredientInput]) : Recipe!
-    updateRecipe(id:ID! recipe_name: String img: String status: enumRecipe description: String price: Int highlight: Boolean input:[ingredientInput]): Recipe!
+    createRecipe(recipe_name: String!  isDiscount: Boolean discountAmount: Int category: Category  img: String description: String price: Int! highlight: Boolean input:[ingredientInput]) : Recipe!
+    updateRecipe(id:ID! recipe_name: String  isDiscount: Boolean discountAmount: Int img: String status: enumRecipe description: String price: Int highlight: Boolean input:[ingredientInput]): Recipe!
     deleteRecipe(id: ID!): respondDelRecipe!
 }`
 

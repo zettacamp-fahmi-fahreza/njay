@@ -165,7 +165,32 @@ const recipesSchema = new mongoose.Schema({
     // },
     
 })
+const specialOffersSchema = new mongoose.Schema({
+    title:{
+        type: String,
+        trim: true,
+        required: true,
+    },
+    description:{
+        type: String,
+        trim: true,
+    },
+    status: {
+        type: String,
+        enum: ["active", "deleted","unpublished"],
+        default: 'unpublished'
+    },
 
+    menu: [
+        {
+            recipe_id:{
+                type: mongoose.Schema.Types.ObjectId,
+                ref: "Recipes",
+                required: true
+            }
+        }
+    ],
+})
 const transactionsSchema = new mongoose.Schema({
     user_id:{
         type: mongoose.Schema.Types.ObjectId,
@@ -240,43 +265,7 @@ const transactionsSchema = new mongoose.Schema({
     // createdA
     // timestamps: true
 },{timestamps: true})
-
-const cartSchema = new mongoose.Schema({
-    user_id:{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Users",
-        required: true
-    },
-    menu: [
-        {
-            recipe_id:{
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "Recipes",
-                required: true
-            },
-            amount: {
-                type: Number,
-                required: true,
-                min: 0
-
-            },
-            note: {
-                type: String
-            }
-        }
-    ],
-    status: {
-        type: String,
-        enum: ['pending', 'success'],
-        default: 'pending'
-    },
-    totalPrice: {
-        type: Number,
-        required: true,
-        min: 0
-    }
-})
-const carts  = mongoose.model("Carts", cartSchema)
+const specialOffers = mongoose.model("specialOffers", specialOffersSchema)
 const users = mongoose.model("Users", userSchema)
 const ingredients = mongoose.model("Ingredients", ingredientsSchema)
 const recipes = mongoose.model("Recipes", recipesSchema)
@@ -289,5 +278,5 @@ module.exports = {
     ingredients,
     recipes,
     transactions,
-    carts
+    specialOffers
 }

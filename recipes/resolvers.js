@@ -142,6 +142,10 @@ async function createRecipe(parent,args,context,info){
     recipe.img = args.img
     recipe.recipe_name = args.recipe_name
     recipe.ingredients = args.input
+    recipe.isDiscount = args.isDiscount
+    recipe.discountAmount = args.discountAmount
+    recipe.highlight = args.highlight
+
     let checkIngredient = await ingredients.find()
     checkIngredient = checkIngredient.map((el) => el.id)
     let ingredientMap = args.input.map((el) => el.ingredient_id)
@@ -263,7 +267,16 @@ async function getAvailable(parent, args, context, info) {
     }
     return Math.min(...minStock);
 }
+async function getDiscountPrice(parent,args,context){
+    let discountPrice = 0
+    if(parent.isDiscount){
+        discountPrice = parent.price - parent.discountAmount
+    }else(
+        discountPrice = 0
+    )
+    return discountPrice
 
+}
 
 async function getIngredientLoader(parent, args, context){
     if (parent.ingredient_id){
@@ -289,12 +302,9 @@ const resolverRecipe = {
         ingredient_id: getIngredientLoader
     },
     Recipe: {
-        available: getAvailable
+        available: getAvailable,
+        priceAfterDiscount: getDiscountPrice
     },
-    // Transaction: {
-    //     available: getAvailable
-    // },
 
 }
-module.exports = getAvailable
 module.exports = resolverRecipe;
