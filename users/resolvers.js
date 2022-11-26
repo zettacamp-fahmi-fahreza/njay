@@ -8,6 +8,7 @@ async function addUser(parent,args, context, info){
     args.password = await bcrypt.hash(args.password, 5)
     
     const newUser = new users(args)
+    newUser.fullName = args.last_name + ', ' + args.first_name
     await newUser.save()
     return newUser;
 }
@@ -18,7 +19,8 @@ async function getAllUsers(parent,{email,last_name,first_name,page,limit,sort}, 
         {$match: {
             status: 'active'
         }},
-        {$sort: {_id:-1}}
+        {$sort: {fullName:1}}
+        
 
     ]
     if (page){
@@ -69,7 +71,6 @@ async function getAllUsers(parent,{email,last_name,first_name,page,limit,sort}, 
             result.forEach((el)=>{
                         el.id = mongoose.Types.ObjectId(el._id)
                     })
-                    console.log(`total time: ${Date.now()- tick} ms`)
                     if(!page){
                         count = result.length
                     }
@@ -78,8 +79,8 @@ async function getAllUsers(parent,{email,last_name,first_name,page,limit,sort}, 
                         throw new ApolloError('FooError', {
                             message: 'Page is Empty!'
                         });
-
                     }
+                    console.log(result)
             return {
             count: count,
             max_page: max_page,

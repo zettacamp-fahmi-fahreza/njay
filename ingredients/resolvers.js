@@ -30,7 +30,7 @@ async function getAllIngredient(parent,{name,stock,page,limit,sort},context){
     }
     if(stock <= 0){
         throw new ApolloError('FooError', {
-            message: 'Stock Cannot Be Zero or Lower!'
+            message: 'Stok nya gak bisa 0!'
           });
     }
     if (page){
@@ -86,7 +86,8 @@ async function getAllIngredient(parent,{name,stock,page,limit,sort},context){
 // ERRORR ADD REGEX HERE TO AVOID DUPICATION
 async function addIngredient(parent,args,context){
     const findDuplicate = await ingredients.findOne({
-        name: new RegExp(args.name, "i")
+        name:  new RegExp("^" + args.name.trim("") + "$", 'i')
+
     })
     if(findDuplicate){
         throw new ApolloError('FooError', {

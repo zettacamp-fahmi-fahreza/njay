@@ -2,6 +2,7 @@ const { Enum } = require('@apollo/protobufjs')
 const express = require('express')
 const mongoose = require('mongoose')
 const moment = require('moment')
+const { Timestamp } = require('bson')
 
 const userSchema = new mongoose.Schema({
     password : {
@@ -21,6 +22,11 @@ const userSchema = new mongoose.Schema({
         trim:true
     },
     first_name: {
+        type: String,
+        required: true,
+        trim:true
+    },
+    fullName: {
         type: String,
         required: true,
         trim:true
@@ -79,8 +85,6 @@ const ingredientsSchema = new mongoose.Schema({
     stock: {
         type: Number,
         required: true,
-        trim: true,
-        min: 0
     },
     status: {
         type: String,
@@ -194,7 +198,7 @@ const transactionsSchema = new mongoose.Schema({
     },
     order_date: {
         type : String,
-        default : moment(new Date()).locale("id-ID").format("LL")
+        default : moment(new Date()).format("LLL")
     },
     status: {
         type: String,
@@ -231,8 +235,11 @@ const transactionsSchema = new mongoose.Schema({
                 min: 0
             }
         }
-    ]
-})
+    ],
+    // created/
+    // createdA
+    // timestamps: true
+},{timestamps: true})
 
 const cartSchema = new mongoose.Schema({
     user_id:{

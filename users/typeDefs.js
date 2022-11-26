@@ -12,6 +12,7 @@ type User {
     role: Role
     # cart: [Menu]
     sort: userSort
+    fullName: String
     }
     type userSort {
         email: enumSorting
@@ -34,7 +35,7 @@ type User {
 type usersPage {
     count: Int
     page: Int
-    users: [User]
+    data: [User]
     max_page: Int
     }
 type respondDelUser {
