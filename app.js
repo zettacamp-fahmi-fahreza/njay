@@ -17,10 +17,12 @@ const resolverUser = require('./users/resolvers')
 const resolverIngredient = require('./ingredients/resolvers')
 const resolverRecipe = require('./recipes/resolvers')
 const resolverTransaction = require('./transactions/resolvers')
+const resolverSpecialOffer = require('./specialOffers/resolvers')
 const {userTypeDefs} = require('./users/typeDefs')
 const {ingredientTypeDefs} = require('./ingredients/typeDefs')
 const {recipeTypeDefs} = require('./recipes/typeDefs')
 const {transactionTypeDefs} = require('./transactions/typeDefs')
+const {specialOfferTypeDefs} = require('./specialOffers/typeDefs')
 
 
 const app = express();
@@ -33,13 +35,15 @@ const typeDefs = [
     userTypeDefs,
     ingredientTypeDefs,
     recipeTypeDefs,
-    transactionTypeDefs
+    transactionTypeDefs,
+    specialOfferTypeDefs
 ]
 const resolvers = merge(
     resolverUser,
     resolverIngredient,
     resolverRecipe,
-    resolverTransaction
+    resolverTransaction,
+    resolverSpecialOffer
 )
     const schema =  makeExecutableSchema({
         typeDefs,

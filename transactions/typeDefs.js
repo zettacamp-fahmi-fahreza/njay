@@ -1,33 +1,8 @@
 
 const { ApolloServer,gql } = require('apollo-server');
 
-const  specialOfferTypeDefs = gql`
-type specialOffer {
-    id: ID
-    title: String
-    description: String
-    menu: [Recipe]
-    status: enumRecipe
-}
 
-type specialOfferPage{
-    count: Int
-    page: Int
-    data: [specialOffer]
-    max_page: Int
-    }
-type Query {
-    getOneSpecialOffer(id:ID!) : specialOffer
-    getAllSpecialOffers(page: Int limit: Int title: String) : specialOfferPage
-}
-type Mutation {
-    createSpecialOffer(title: String, description: String, menu: [Recipe], status:enumRecipe): specialOffer
-    
-    updateTransaction(id:ID! option: enumUpdate, note: String recipe_id: ID) : Transaction!
-}
-`
 const transactionTypeDefs = gql`#graphql
-# scalar Date
 type Menu {
         id: ID
         recipe_id: Recipe
@@ -92,6 +67,5 @@ type Mutation {
     updateTransaction(id:ID! option: enumUpdate, note: String recipe_id: ID) : Transaction!
 }
 `
-
 
 module.exports = {transactionTypeDefs}

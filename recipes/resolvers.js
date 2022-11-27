@@ -174,8 +174,7 @@ async function updateRecipe(parent,args,context){
         new: true
     })
     if(args.status === "unpublished" || recipe.status === "unpublished"){
-        // console.log(transaction)
-        const tes = await transactions.findOneAndUpdate(
+        await transactions.findOneAndUpdate(
             {"menu.recipe_id": mongoose.Types.ObjectId(args.id)}
             ,{
             $set: {
@@ -183,16 +182,8 @@ async function updateRecipe(parent,args,context){
             }
         },{new : true}
         )
-
-        // let transaction = await transactions.findOne({
-        //     "menu.recipe_id": mongoose.Types.ObjectId(args.id),
-        //     order_status: "pending"
-        // })
-
-
         await transactions.findOne(
             {"menu.recipe_id": mongoose.Types.ObjectId(args.id)}
-
         )
     }
 
@@ -206,16 +197,8 @@ async function updateRecipe(parent,args,context){
             }
         },{new : true}
         )
-
-        // let transaction = await transactions.findOne({
-        //     "menu.recipe_id": mongoose.Types.ObjectId(args.id),
-        //     order_status: "pending"
-        // })
-
-
         await transactions.findOne(
             {"menu.recipe_id": mongoose.Types.ObjectId(args.id)}
-
         )
     }
     if(args.input){

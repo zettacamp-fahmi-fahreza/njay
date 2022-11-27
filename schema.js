@@ -181,7 +181,7 @@ const specialOffersSchema = new mongoose.Schema({
         default: 'unpublished'
     },
 
-    menu: [
+    menuDiscount: [
         {
             recipe_id:{
                 type: mongoose.Schema.Types.ObjectId,

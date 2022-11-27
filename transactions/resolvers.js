@@ -579,6 +579,9 @@ const resolverTransaction = {
     },
     Menu: {
         recipe_id: getRecipeLoader
+    },
+    menuDiscount: {
+        recipe_id: getRecipeLoader
     }
 
 }
