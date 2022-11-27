@@ -63,7 +63,7 @@ const recipeTypeDefs = gql`
 
 type Query {
     getActiveMenu(recipe_name: String,page: Int,limit: Int  sorting: recipeSorting highlight: Boolean): recipePage!
-    getAllRecipes(recipe_name: String page: Int,limit: Int input: recipeSorting): recipePage!
+    getAllRecipes(recipe_name: String page: Int,limit: Int input: recipeSorting highlight: Boolean): recipePage!
 
     getOneRecipe(id:ID!): Recipe
 }

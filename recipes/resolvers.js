@@ -14,10 +14,10 @@ async function getActiveMenu(parent,args,context,info) {
             }},
             {$sort: {_id:-1}}
     ]
-    if(args.highlight === true) {
+    if(args.highlight) {
         aggregateQuery.push({
             $match: {
-                highlight: true
+                highlight: args.highlight
             }
         })
     }
@@ -86,6 +86,13 @@ async function getAllRecipes(parent,args,context,info) {
 
 
     ]
+    if(args.highlight) {
+        aggregateQuery.push({
+            $match: {
+                highlight: args.highlight
+            }
+        })
+    }
     if(args.recipe_name){
         aggregateQuery.push({
             $match: {recipe_name: new RegExp(args.recipe_name, "i")}
