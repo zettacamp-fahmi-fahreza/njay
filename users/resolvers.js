@@ -3,6 +3,7 @@ const {users} = require('../schema');
 const { ApolloError} = require('apollo-errors');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
+const { ifError } = require('assert');
 
 async function addUser(parent,args, context, info){
     args.password = await bcrypt.hash(args.password, 5)
@@ -20,7 +21,7 @@ async function getAllUsers(parent,{email,last_name,first_name,page,limit,sort}, 
             status: 'active'
         }},
         {$sort: {fullName:1}}
-        
+
 
     ]
     if (page){
@@ -104,16 +105,24 @@ async function getOneUser(parent,args, context){
           });
     }
 }
-async function updateUser(parent, args,contect){
+async function updateUser(parent, args,context){
     
     
-      if(!args.password){
+    //   if(!args.password){
+    //     throw new ApolloError('FooError', {
+    //         message: 'Password is Needed!'
+    //       });
+    // }
+    if(args.isUsed === true){
         throw new ApolloError('FooError', {
-            message: 'Password is Needed!'
+            message: 'Cannot be change from here!'
           });
     }
-    args.password = await bcrypt.hash(args.password, 5)
-    const updateUser = await users.findByIdAndUpdate(args.id, args,{
+    if(args.last_name && args.first_name){
+        args.fullName = args.last_name + ', ' + args.first_name
+    }
+    // args.password = await bcrypt.hash(args.password, 5)
+    const updateUser = await users.findByIdAndUpdate(context.req.payload, args,{
         new: true
     })
     if(updateUser){
@@ -140,14 +149,34 @@ async function deleteUser(parent, args,context){
 async function getToken(parent, args,context){
     // const email = await u
         const tick = Date.now()
+        if(!args.email){
+            return new ApolloError('FooError', {
+                message: 'Email Required !'
+              });
+        }
 
-
+        if(!args.password){
+            return new ApolloError('FooError', {
+                message: 'Password Required !'
+              });
+        }
     const userCheck = await users.findOne({email: args.email})
     if(!userCheck){
         return new ApolloError('FooError', {
             message: 'Email Not Found !'
           });
     }
+    //FEATURE OR DEVELOPMENT
+    if(userCheck.isUsed === true)return new ApolloError('FooError', {
+        message: 'Your account has been used !'
+      });
+    await users.updateOne({
+        email: args.email
+    },{
+        $set: {
+            isUsed: true
+        }
+    })
     if(userCheck.status === 'deleted'){
         throw new ApolloError('FooError', 
         {message: "Can't Login, User Status: Deleted!"})

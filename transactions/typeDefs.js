@@ -55,6 +55,7 @@ enum enumUpdate {
     delete
     push
     pull
+    emptyCart
 }
 
 type Query {
@@ -64,7 +65,7 @@ type Query {
 type Mutation {
     createTransaction( input: menuInput) : Transaction
     checkoutTransaction: [Transaction]
-    updateTransaction(id:ID! option: enumUpdate, note: String recipe_id: ID) : Transaction!
+    updateTransaction(id:ID! option: enumUpdate,amount:Int, note: String recipe_id: ID) : Transaction!
 }
 `
 

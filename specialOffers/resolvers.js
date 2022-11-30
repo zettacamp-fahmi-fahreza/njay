@@ -1,17 +1,29 @@
 const mongoose = require('mongoose');
 const { users, transactions, recipes, ingredients, specialOffers } = require('../schema');
 const { ApolloError } = require('apollo-errors');
+const { ifError } = require('assert');
 
 async function createSpecialOffer(parent, { title, description, discountAmount, menuDiscount, status }, context, info) {
     try {
-        if (menuDiscount.length == 0) {
+        if (!menuDiscount || !menuDiscount.length) {
             throw new ApolloError('FooError', {
-                message: "Ingredient cannot be empty!"
+                message: "Menu cannot be empty!"
             })
         }
+        if(discountAmount < 0 || discountAmount > 100) {
+            throw new ApolloError('FooError', {
+                message: "Discount is out of range!"
+            })
+        }
+        
         const specialOffer = {}
-        specialOffer.title = title
-        specialOffer.description = description
+        specialOffer.title = title.trim()
+        if(specialOffer.title === ""){
+            throw new ApolloError('FooError', {
+                message: "Title Required!"
+            })
+        }
+        specialOffer.description = description.trim()
         specialOffer.menuDiscount = menuDiscount
         specialOffer.status = status
         let checkId = []
@@ -34,21 +46,31 @@ async function createSpecialOffer(parent, { title, description, discountAmount, 
         })
         for (menu of checkStatusMenu) {
             console.log(menu)
-            if(menu.status === 'unpublished'){
+            if(menu.status === 'unpublished' || menu.status === 'deleted') {
                 throw new ApolloError("FooError",{
                     message: "Menu You Insert is Unpublished!"
                 })
             }
         }
-        await recipes.updateMany({ _id: {
-            $in: checkId
-        }},{
-            isDiscount: false,
-            discountAmount: discountAmount
-        },{new:true})
-        const newSpecialOffer = await specialOffers.create(specialOffer)
-
-        return newSpecialOffer
+        if(status === 'unpublished') {
+            await recipes.updateMany({ _id: {
+                $in: checkId
+            }},{
+                isDiscount: false,
+                discountAmount: discountAmount
+            },{new:true})
+        }
+        if(status === 'active'){
+            await recipes.updateMany({ _id: {
+                $in: checkId
+            }},{
+                isDiscount: true,
+                discountAmount: discountAmount
+            },{new:true})
+        }
+        // const newSpecialOffer = await specialOffers.create(specialOffer)
+        console.log(specialOffer)
+        return specialOffer
     }
     catch (err) {
         throw new ApolloError('FooError', err)

@@ -13,6 +13,7 @@ type User {
     # cart: [Menu]
     sort: userSort
     fullName: String
+    isUsed: Boolean
     }
     type userSort {
         email: enumSorting
@@ -61,6 +62,7 @@ type userLogin {
     last_name: String
     userType: userType
     role: Role
+    isUsed: Boolean
     
     
 }
@@ -80,12 +82,15 @@ type Mutation {
     role: Role!
     ) : User!
     updateUser(
-        id: ID!
-        password: String
+        id: ID
+        # password: String
     email: String
     last_name: String
     first_name: String
-    ): User!
+    status: Enum
+    isUsed: Boolean
+    
+    ): User
     deleteUser(id: ID!): respondDelUser!
     getToken(email: String!, password:String!) : login!
 

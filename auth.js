@@ -44,7 +44,8 @@ module.exports = {
         createRecipe: authMiddleware,
         createTransaction: authMiddleware,
         updateTransaction: authMiddleware,
-        // addCart: authMiddleware,
+        createSpecialOffer: authMiddleware,
+        updateSpecialOffer: authMiddleware,
     }
 }
 

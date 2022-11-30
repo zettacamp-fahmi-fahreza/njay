@@ -49,7 +49,7 @@ const recipeTypeDefs = gql`
     img: String
     description: String
     category: Category
-    priceAfterDiscount: Int
+    finalPrice: Int
     highlight: Boolean
     isDiscount: Boolean
     discountAmount: Int

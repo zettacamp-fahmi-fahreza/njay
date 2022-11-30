@@ -30,7 +30,7 @@ async function getAllIngredient(parent,{name,stock,page,limit,sort},context){
     }
     if(stock <= 0){
         throw new ApolloError('FooError', {
-            message: 'Stok nya gak bisa 0!'
+            message: 'Stock Cannot be 0!'
           });
     }
     if (page){

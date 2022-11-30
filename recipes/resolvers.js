@@ -257,12 +257,12 @@ async function getAvailable(parent, args, context, info) {
     }
     return Math.min(...minStock);
 }
-async function getDiscountPrice(parent,args,context){
+function getDiscountPrice(parent,args,context){
     let discountPrice = 0
     if(parent.isDiscount){
-        discountPrice = parent.price - parent.discountAmount
+        discountPrice = parent.price - (parent.price * parent.discountAmount/100)
     }else(
-        discountPrice = 0
+        discountPrice = parent.price
     )
     return discountPrice
 
@@ -293,7 +293,7 @@ const resolverRecipe = {
     },
     Recipe: {
         available: getAvailable,
-        priceAfterDiscount: getDiscountPrice
+        finalPrice: getDiscountPrice
     },
 
 }

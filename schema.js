@@ -58,22 +58,10 @@ const userSchema = new mongoose.Schema({
         type: String,
         enum: ['user','admin'],
     },
-    // cart: [
-    //     {
-    //         recipe_id:{
-    //             type: mongoose.Schema.Types.ObjectId,
-    //             ref: "Recipes",
-    //             required: true
-    //         },
-    //         amount: {
-    //             type: Number,
-    //             required: true,
-    //         },
-    //         note: {
-    //             type: String
-    //         }
-    //     }
-    // ]
+    isUsed: {
+        type: Boolean,
+        default: false
+    }
 })
 const ingredientsSchema = new mongoose.Schema({
     name: {
@@ -234,7 +222,7 @@ const transactionsSchema = new mongoose.Schema({
     onePrice: {
         type: Number,
         // required: true,
-        min: 0
+        // min: 0
     },
     recipeStatus:{
         type: String,
