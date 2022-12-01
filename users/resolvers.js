@@ -105,6 +105,17 @@ async function getOneUser(parent,args, context){
           });
     }
 }
+// async function logout(parent,args,context){
+//     const updateUser = await users.findByIdAndUpdate(context.req.payload, args,{
+//         new: true
+//     })
+//     if(updateUser){
+//         return updateUser
+//     }
+//     throw new ApolloError('FooError', {
+//         message: 'Wrong ID!'
+//       });
+// }
 async function updateUser(parent, args,context){
     
     
@@ -186,7 +197,7 @@ async function getToken(parent, args,context){
         throw new ApolloError('FooError', 
         {message: "Wrong password!"})
     }
-    const token = jwt.sign({ email: args.email,},'zetta',{expiresIn:'6h'});
+    const token = jwt.sign({ email: args.email,},'zetta',{expiresIn: "6h"});
         console.log(`Total Time for Login: ${Date.now()- tick} ms`)
     return{message: token, user: { 
         email: userCheck.email, 
@@ -194,7 +205,8 @@ async function getToken(parent, args,context){
         first_name: userCheck.first_name, 
         last_name: userCheck.last_name,
         userType: userCheck.userType,
-        role: userCheck.role
+        role: userCheck.role,
+        img: userCheck.img
     }}
 }
 

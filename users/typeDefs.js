@@ -3,6 +3,7 @@ const { ApolloServer,gql } = require('apollo-server');
 const userTypeDefs = gql`#graphql
 type User {
     id: ID
+    img: String
     password: String
     email: String
     last_name: String
@@ -63,7 +64,7 @@ type userLogin {
     userType: userType
     role: Role
     isUsed: Boolean
-    
+    img: String
     
 }
 type respondAddCart {
@@ -75,6 +76,7 @@ type login {
     }
 type Mutation {
     addUser(
+    img: String
     password: String!
     email: String!
     last_name: String!
@@ -93,7 +95,7 @@ type Mutation {
     ): User
     deleteUser(id: ID!): respondDelUser!
     getToken(email: String!, password:String!) : login!
-
+    logout(isUsed: Boolean): User
     # addCart( input: [menuInput]) : respondAddCart!
 }
 type Query {
