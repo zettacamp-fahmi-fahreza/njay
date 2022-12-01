@@ -165,10 +165,10 @@
     "xss": "^1.0.14",
     "yallist": "^4.0.0"
   },
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon app.js"
-  },
+    "scripts": {
+            "start": "node app.js",
+            "dev": "nodemon app.js"
+         },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/zettacamp-fahmi-fahreza/cisi_zettacamp_catfish.git"
